@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,23 @@ const STEPS: Record<string, { label: string; icon: string }> = {
   jobs_found: { label: "Found relevant jobs for you", icon: "6" },
   complete: { label: "Analysis complete!", icon: "7" },
 };
+
+function useElapsedTime(running: boolean) {
+  const [elapsed, setElapsed] = useState(0);
+  const startRef = useRef(Date.now());
+
+  useEffect(() => {
+    if (!running) return;
+    startRef.current = Date.now();
+    setElapsed(0);
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [running]);
+
+  const mins = Math.floor(elapsed / 60);
+  const secs = elapsed % 60;
+  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+}
 
 export function CekCVIndividual() {
   const [file, setFile] = useState<File | null>(null);
@@ -121,55 +138,7 @@ export function CekCVIndividual() {
 
   // Show progress while processing
   if (isProcessing && !isComplete) {
-    const currentStep = status?.step || "started";
-    const progress = status?.progress || 0;
-
-    return (
-      <Card className="mx-auto max-w-2xl">
-        <CardHeader>
-          <CardTitle>Analyzing Your CV</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Progress value={progress} className="h-3" />
-          <p className="text-center text-lg font-medium">
-            {status?.stepDescription || "Starting..."}
-          </p>
-
-          <div className="space-y-3">
-            {Object.entries(STEPS).map(([key, { label, icon }]) => {
-              const stepOrder = Object.keys(STEPS);
-              const currentIdx = stepOrder.indexOf(currentStep);
-              const thisIdx = stepOrder.indexOf(key);
-              const isDone = thisIdx < currentIdx;
-              const isCurrent = key === currentStep;
-
-              return (
-                <div key={key} className="flex items-center gap-3">
-                  <div
-                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium ${
-                      isDone
-                        ? "bg-primary text-primary-foreground"
-                        : isCurrent
-                          ? "bg-primary/20 text-primary ring-2 ring-primary"
-                          : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {isDone ? "\u2713" : icon}
-                  </div>
-                  <span
-                    className={`text-sm ${
-                      isDone ? "text-foreground" : isCurrent ? "font-medium text-foreground" : "text-muted-foreground"
-                    }`}
-                  >
-                    {label}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <ProgressView status={status} pollError={pollError} onReset={handleReset} />;
   }
 
   // Error state
@@ -481,5 +450,94 @@ function ResultsView({
         <Button variant="outline" onClick={onReset}>Analyze Another CV</Button>
       </div>
     </div>
+  );
+}
+
+function ProgressView({
+  status,
+  pollError,
+  onReset,
+}: {
+  status: { step?: string; progress?: number; stepDescription?: string; status?: string; error?: string | null } | null;
+  pollError: string | null;
+  onReset: () => void;
+}) {
+  const currentStep = status?.step || "started";
+  const progress = status?.progress || 0;
+  const elapsedTime = useElapsedTime(true);
+  const stepOrder = Object.keys(STEPS);
+  const currentIdx = stepOrder.indexOf(currentStep);
+  const description = status?.stepDescription || STEPS[currentStep]?.label || "Processing...";
+
+  return (
+    <Card className="mx-auto max-w-2xl">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Analyzing Your CV</CardTitle>
+          <span className="text-sm text-muted-foreground">{elapsedTime}</span>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="space-y-2">
+          <Progress value={progress} className="h-3" />
+          <div className="flex justify-between text-xs text-muted-foreground">
+            <span>{progress}%</span>
+            <span>Step {Math.min(currentIdx + 1, stepOrder.length)} of {stepOrder.length}</span>
+          </div>
+        </div>
+
+        <p className="text-center text-lg font-medium">
+          {description}
+        </p>
+
+        {pollError && (
+          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3">
+            <p className="text-sm font-medium text-destructive">Connection issue</p>
+            <p className="text-xs text-destructive/80">{pollError}</p>
+          </div>
+        )}
+
+        <div className="space-y-2">
+          {stepOrder.map((key, thisIdx) => {
+            const { label, icon } = STEPS[key];
+            const isDone = thisIdx < currentIdx;
+            const isCurrent = key === currentStep;
+
+            return (
+              <div key={key} className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isCurrent ? "bg-primary/5" : ""}`}>
+                <div
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-medium transition-all ${
+                    isDone
+                      ? "bg-primary text-primary-foreground"
+                      : isCurrent
+                        ? "bg-primary text-primary-foreground animate-pulse"
+                        : "bg-muted text-muted-foreground"
+                  }`}
+                >
+                  {isDone ? "\u2713" : icon}
+                </div>
+                <span
+                  className={`text-sm ${
+                    isDone
+                      ? "text-muted-foreground line-through"
+                      : isCurrent
+                        ? "font-semibold text-foreground"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="flex justify-center pt-2">
+          <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
+            Cancel
+          </Button>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

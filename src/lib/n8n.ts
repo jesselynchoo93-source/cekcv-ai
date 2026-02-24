@@ -61,8 +61,12 @@ export async function submitCompany(formData: FormData): Promise<SubmitResponse>
 
 export async function pollStatus(jobId: string): Promise<StatusResponse> {
   const res = await fetch(
-    `${N8N_BASE_URL}/webhook/cekcv-status?jobId=${encodeURIComponent(jobId)}`,
-    { headers: N8N_HEADERS }
+    `${N8N_BASE_URL}/webhook/cekcv-poll-status`,
+    {
+      method: "POST",
+      headers: { ...N8N_HEADERS, "Content-Type": "application/json" },
+      body: JSON.stringify({ jobId }),
+    }
   );
   return parseJsonResponse(res);
 }
