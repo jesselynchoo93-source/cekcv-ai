@@ -12,6 +12,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useJobPolling } from "@/hooks/use-job-polling";
 
+// Safely convert any value (string or object) to a displayable string
+function toText(val: unknown): string {
+  if (typeof val === "string") return val;
+  if (val && typeof val === "object") {
+    const obj = val as Record<string, unknown>;
+    // Common object shapes from n8n advisor output
+    return (obj.suggestion || obj.action || obj.text || obj.gap || obj.description || JSON.stringify(val)) as string;
+  }
+  return String(val ?? "");
+}
+
 const STEPS: Record<string, { label: string; icon: string }> = {
   started: { label: "Starting analysis...", icon: "1" },
   analyzing: { label: "AI is reading your CV and job description...", icon: "2" },
@@ -152,11 +163,11 @@ function ResultsView({
   const candidate = result.candidate as { name?: string; email?: string; phone?: string } | undefined;
   const assessment = result.current_assessment as {
     overall_score?: number; must_match_percentage?: number; nice_match_percentage?: number;
-    status?: string; summary?: string; strengths?: string[]; gaps?: string[];
+    status?: string; summary?: string; strengths?: unknown[]; gaps?: unknown[];
   } | undefined;
   const improvements = result.improvements as {
-    missing_keywords?: string[]; suggestions?: string[];
-    ats_formatting_tips?: string[]; top_3_priority_actions?: string[];
+    missing_keywords?: unknown[]; suggestions?: unknown[];
+    ats_formatting_tips?: unknown[]; top_3_priority_actions?: unknown[];
   } | undefined;
   const projection = result.score_projection as {
     current_score?: number; estimated_improved_score?: number;
@@ -167,9 +178,13 @@ function ResultsView({
     total_found?: number; search_query?: string; search_location?: string;
   } | undefined;
   const improvedResume = result.improved_resume as {
-    changes_made?: string[]; keywords_added?: string[];
+    changes_made?: unknown[]; keywords_added?: unknown[];
   } | undefined;
-  const scoreBreakdown = result.score_breakdown as { category?: string; name?: string; score?: number; value?: number }[] | undefined;
+  const rawBreakdown = result.score_breakdown;
+  const scoreBreakdown = (Array.isArray(rawBreakdown) ? rawBreakdown : []) as {
+    category?: string; name?: string; score?: number; value?: number;
+    current_score?: number; max_score?: number; weight?: number; weighted_current?: number; weighted_max?: number;
+  }[];
 
   const score = (assessment?.overall_score as number) || 0;
   const scoreColor =
@@ -221,14 +236,16 @@ function ResultsView({
                 <div className="space-y-3">
                   {scoreBreakdown.map((item, i) => {
                     const name = item.category || item.name || `Category ${i + 1}`;
-                    const s = item.score ?? item.value ?? 0;
+                    const s = item.score ?? item.value ?? item.weighted_current ?? item.current_score ?? 0;
+                    const max = item.weighted_max ?? item.max_score ?? 100;
+                    const pct = max > 0 ? Math.round((s / max) * 100) : s;
                     return (
                       <div key={i} className="space-y-1">
                         <div className="flex justify-between text-sm">
                           <span>{name}</span>
-                          <span className="font-medium">{s}</span>
+                          <span className="font-medium">{s}/{max}</span>
                         </div>
-                        <Progress value={s} className="h-2" />
+                        <Progress value={pct} className="h-2" />
                       </div>
                     );
                   })}
@@ -247,7 +264,7 @@ function ResultsView({
                     {assessment.strengths.map((s, i) => (
                       <li key={i} className="flex gap-2 text-sm">
                         <span className="shrink-0 text-green-600">+</span>
-                        {s}
+                        {toText(s)}
                       </li>
                     ))}
                   </ul>
@@ -262,7 +279,7 @@ function ResultsView({
                     {assessment.gaps.map((g, i) => (
                       <li key={i} className="flex gap-2 text-sm">
                         <span className="shrink-0 text-red-500">-</span>
-                        {g}
+                        {toText(g)}
                       </li>
                     ))}
                   </ul>
@@ -305,13 +322,13 @@ function ResultsView({
 
         {/* Improvements Tab */}
         <TabsContent value="improvements" className="space-y-6">
-          {improvements?.top_3_priority_actions && (
+          {improvements?.top_3_priority_actions && improvements.top_3_priority_actions.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Top Priority Actions</CardTitle></CardHeader>
               <CardContent>
                 <ol className="list-decimal space-y-2 pl-5">
                   {improvements.top_3_priority_actions.map((a, i) => (
-                    <li key={i} className="text-sm">{a}</li>
+                    <li key={i} className="text-sm">{toText(a)}</li>
                   ))}
                 </ol>
               </CardContent>
@@ -324,7 +341,7 @@ function ResultsView({
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {improvements.missing_keywords.map((kw, i) => (
-                    <Badge key={i} variant="secondary">{kw}</Badge>
+                    <Badge key={i} variant="secondary">{toText(kw)}</Badge>
                   ))}
                 </div>
               </CardContent>
@@ -337,7 +354,7 @@ function ResultsView({
               <CardContent>
                 <ul className="space-y-2">
                   {improvements.suggestions.map((s, i) => (
-                    <li key={i} className="text-sm">{s}</li>
+                    <li key={i} className="text-sm">{toText(s)}</li>
                   ))}
                 </ul>
               </CardContent>
@@ -350,7 +367,7 @@ function ResultsView({
               <CardContent>
                 <ul className="space-y-2">
                   {improvements.ats_formatting_tips.map((t, i) => (
-                    <li key={i} className="text-sm">{t}</li>
+                    <li key={i} className="text-sm">{toText(t)}</li>
                   ))}
                 </ul>
               </CardContent>
@@ -366,7 +383,7 @@ function ResultsView({
               <CardContent>
                 <ul className="space-y-2">
                   {improvedResume.changes_made.map((c, i) => (
-                    <li key={i} className="text-sm">{c}</li>
+                    <li key={i} className="text-sm">{toText(c)}</li>
                   ))}
                 </ul>
               </CardContent>
@@ -379,7 +396,7 @@ function ResultsView({
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {improvedResume.keywords_added.map((kw, i) => (
-                    <Badge key={i} variant="secondary">{kw}</Badge>
+                    <Badge key={i} variant="secondary">{toText(kw)}</Badge>
                   ))}
                 </div>
               </CardContent>
