@@ -11,6 +11,7 @@ export function useJobPolling() {
   const [status, setStatus] = useState<StatusResponse | null>(null);
   const [polling, setPolling] = useState(false);
   const [pollError, setPollError] = useState<string | null>(null);
+  const [stepDescriptions, setStepDescriptions] = useState<Record<string, string>>({});
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const errorCountRef = useRef(0);
@@ -55,7 +56,16 @@ export function useJobPolling() {
       }
 
       errorCountRef.current = 0;
-      setStatus(data as StatusResponse);
+      const statusData = data as StatusResponse;
+      setStatus(statusData);
+
+      // Accumulate step descriptions as they arrive
+      if (statusData.step && statusData.stepDescription) {
+        setStepDescriptions((prev) => ({
+          ...prev,
+          [statusData.step!]: statusData.stepDescription!,
+        }));
+      }
 
       if (data.status === "complete" || data.status === "error") {
         stop();
@@ -79,6 +89,7 @@ export function useJobPolling() {
       setJobId(id);
       setStatus(null);
       setPollError(null);
+      setStepDescriptions({});
       setPolling(true);
       errorCountRef.current = 0;
       // Small delay before first poll to let Init Job Status write the row
@@ -93,6 +104,7 @@ export function useJobPolling() {
     setJobId(null);
     setStatus(null);
     setPollError(null);
+    setStepDescriptions({});
     errorCountRef.current = 0;
   }, [stop]);
 
@@ -100,5 +112,5 @@ export function useJobPolling() {
     return () => stop();
   }, [stop]);
 
-  return { jobId, status, polling, pollError, start, reset };
+  return { jobId, status, polling, pollError, stepDescriptions, start, reset };
 }

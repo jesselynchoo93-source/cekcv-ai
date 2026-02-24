@@ -124,3 +124,12 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes pulse-ring {
+  0%, 100% {
+    box-shadow: 0 0 0 0 oklch(0.205 0 0 / 20%);
+  }
+  50% {
+    box-shadow: 0 0 0 6px oklch(0.205 0 0 / 0%);
+  }
+}

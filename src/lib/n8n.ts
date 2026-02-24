@@ -72,3 +72,32 @@ export async function pollStatus(jobId: string): Promise<StatusResponse> {
   // n8n respondWith: "allIncomingItems" wraps in array
   return Array.isArray(data) ? data[0] : data;
 }
+
+export interface JobSearchResponse {
+  success: boolean;
+  jobs: Array<{
+    title: string;
+    company: string;
+    location: string;
+    url: string;
+    match_score?: number;
+  }>;
+  error?: string;
+}
+
+export async function searchJobs(
+  role: string,
+  location: string,
+  limit: number = 10
+): Promise<JobSearchResponse> {
+  const res = await fetch(
+    `${N8N_BASE_URL}/webhook/cekcv-search-jobs`,
+    {
+      method: "POST",
+      headers: { ...N8N_HEADERS, "Content-Type": "application/json" },
+      body: JSON.stringify({ role, location, limit }),
+    }
+  );
+  const data = await parseJsonResponse<JobSearchResponse | JobSearchResponse[]>(res);
+  return Array.isArray(data) ? data[0] : data;
+}
