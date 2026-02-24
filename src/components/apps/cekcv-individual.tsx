@@ -28,7 +28,7 @@ export function CekCVIndividual() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  const { status, polling, start, reset } = useJobPolling();
+  const { status, polling, pollError, start, reset } = useJobPolling();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,8 +72,8 @@ export function CekCVIndividual() {
 
   const result = status?.result as Record<string, unknown> | null;
   const isComplete = status?.status === "complete" && result;
-  const isError = status?.status === "error";
-  const isProcessing = polling || status?.status === "processing";
+  const isError = status?.status === "error" || !!pollError;
+  const isProcessing = polling || (status?.status === "processing" && !pollError);
 
   // Show form when no job is running
   if (!isProcessing && !isComplete && !isError) {
@@ -178,7 +178,7 @@ export function CekCVIndividual() {
       <Card className="mx-auto max-w-2xl">
         <CardContent className="py-10 text-center">
           <p className="text-lg font-medium text-destructive">Analysis Failed</p>
-          <p className="mt-2 text-muted-foreground">{status?.error || "An unknown error occurred"}</p>
+          <p className="mt-2 text-muted-foreground">{pollError || status?.error || "An unknown error occurred"}</p>
           <Button onClick={handleReset} className="mt-6">Try Again</Button>
         </CardContent>
       </Card>
