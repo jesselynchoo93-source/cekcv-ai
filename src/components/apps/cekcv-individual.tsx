@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, Component, type ReactNode } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,12 +15,52 @@ import { useJobPolling } from "@/hooks/use-job-polling";
 // Safely convert any value (string or object) to a displayable string
 function toText(val: unknown): string {
   if (typeof val === "string") return val;
+  if (typeof val === "number" || typeof val === "boolean") return String(val);
   if (val && typeof val === "object") {
     const obj = val as Record<string, unknown>;
-    // Common object shapes from n8n advisor output
-    return (obj.suggestion || obj.action || obj.text || obj.gap || obj.description || JSON.stringify(val)) as string;
+    const found = obj.suggestion || obj.action || obj.text || obj.gap || obj.description || obj.name;
+    if (typeof found === "string") return found;
+    return JSON.stringify(val);
   }
   return String(val ?? "");
+}
+
+// Safely ensure a value is an array before calling .map()
+function asArray(val: unknown): unknown[] {
+  return Array.isArray(val) ? val : [];
+}
+
+// Error boundary to catch rendering crashes and show the actual error
+class ResultsErrorBoundary extends Component<
+  { children: ReactNode; onReset: () => void },
+  { error: Error | null }
+> {
+  constructor(props: { children: ReactNode; onReset: () => void }) {
+    super(props);
+    this.state = { error: null };
+  }
+  static getDerivedStateFromError(error: Error) {
+    return { error };
+  }
+  render() {
+    if (this.state.error) {
+      return (
+        <Card className="mx-auto max-w-2xl">
+          <CardContent className="py-10 text-center">
+            <p className="text-lg font-medium text-destructive">Display Error</p>
+            <p className="mt-2 text-sm text-muted-foreground">
+              The results were received but could not be displayed.
+            </p>
+            <pre className="mt-4 max-h-40 overflow-auto rounded bg-muted p-3 text-left text-xs">
+              {this.state.error.message}
+            </pre>
+            <Button onClick={this.props.onReset} className="mt-6">Try Again</Button>
+          </CardContent>
+        </Card>
+      );
+    }
+    return this.props.children;
+  }
 }
 
 const STEPS: Record<string, { label: string; icon: string }> = {
@@ -149,8 +189,12 @@ export function CekCVIndividual() {
     );
   }
 
-  // Results display
-  return <ResultsView result={result!} onReset={handleReset} />;
+  // Results display — wrapped in error boundary
+  return (
+    <ResultsErrorBoundary onReset={handleReset}>
+      <ResultsView result={result!} onReset={handleReset} />
+    </ResultsErrorBoundary>
+  );
 }
 
 function ResultsView({
@@ -160,44 +204,36 @@ function ResultsView({
   result: Record<string, unknown>;
   onReset: () => void;
 }) {
-  const candidate = result.candidate as { name?: string; email?: string; phone?: string } | undefined;
-  const assessment = result.current_assessment as {
-    overall_score?: number; must_match_percentage?: number; nice_match_percentage?: number;
-    status?: string; summary?: string; strengths?: unknown[]; gaps?: unknown[];
-  } | undefined;
-  const improvements = result.improvements as {
-    missing_keywords?: unknown[]; suggestions?: unknown[];
-    ats_formatting_tips?: unknown[]; top_3_priority_actions?: unknown[];
-  } | undefined;
-  const projection = result.score_projection as {
-    current_score?: number; estimated_improved_score?: number;
-    potential_gain?: number; summary?: string;
-  } | undefined;
-  const jobs = result.recommended_jobs as {
-    jobs?: { title?: string; job_title?: string; company?: string; company_name?: string; location?: string; url?: string }[];
-    total_found?: number; search_query?: string; search_location?: string;
-  } | undefined;
-  const improvedResume = result.improved_resume as {
-    changes_made?: unknown[]; keywords_added?: unknown[];
-  } | undefined;
-  const rawBreakdown = result.score_breakdown;
-  const scoreBreakdown = (Array.isArray(rawBreakdown) ? rawBreakdown : []) as {
-    category?: string; name?: string; score?: number; value?: number;
-    current_score?: number; max_score?: number; weight?: number; weighted_current?: number; weighted_max?: number;
-  }[];
+  const candidate = (result.candidate || {}) as Record<string, unknown>;
+  const assessment = (result.current_assessment || {}) as Record<string, unknown>;
+  const improvements = (result.improvements || {}) as Record<string, unknown>;
+  const projection = (result.score_projection || {}) as Record<string, unknown>;
+  const jobs = (result.recommended_jobs || {}) as Record<string, unknown>;
+  const improvedResume = (result.improved_resume || {}) as Record<string, unknown>;
+  const scoreBreakdown = asArray(result.score_breakdown);
 
-  const score = (assessment?.overall_score as number) || 0;
+  const score = Number(assessment.overall_score) || 0;
   const scoreColor =
     score >= 80 ? "text-green-600" : score >= 60 ? "text-yellow-600" : "text-red-600";
+
+  const strengths = asArray(assessment.strengths);
+  const gaps = asArray(assessment.gaps);
+  const topActions = asArray(improvements.top_3_priority_actions);
+  const missingKeywords = asArray(improvements.missing_keywords);
+  const suggestions = asArray(improvements.suggestions);
+  const atsTips = asArray(improvements.ats_formatting_tips);
+  const changesMade = asArray(improvedResume.changes_made);
+  const keywordsAdded = asArray(improvedResume.keywords_added);
+  const jobList = asArray(jobs.jobs);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="text-2xl font-bold">{candidate?.name || "Candidate"}</h2>
+          <h2 className="text-2xl font-bold">{toText(candidate.name) || "Candidate"}</h2>
           <p className="text-muted-foreground">
-            {[candidate?.email, candidate?.phone].filter(Boolean).join(" | ")}
+            {[candidate.email, candidate.phone].filter(Boolean).map(toText).join(" | ")}
           </p>
           {typeof result.role === "string" && (
             <p className="mt-1 text-sm text-muted-foreground">
@@ -208,7 +244,7 @@ function ResultsView({
         <div className="text-right">
           <p className={`text-4xl font-bold ${scoreColor}`}>{score}</p>
           <p className="text-sm text-muted-foreground">Overall Score</p>
-          {typeof assessment?.status === "string" && (
+          {typeof assessment.status === "string" && (
             <Badge className="mt-1" variant={score >= 70 ? "default" : "secondary"}>
               {assessment.status}
             </Badge>
@@ -229,15 +265,16 @@ function ResultsView({
         {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-6">
           {/* Score Breakdown */}
-          {scoreBreakdown && scoreBreakdown.length > 0 && (
+          {scoreBreakdown.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Score Breakdown</CardTitle></CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {scoreBreakdown.map((item, i) => {
-                    const name = item.category || item.name || `Category ${i + 1}`;
-                    const s = item.score ?? item.value ?? item.weighted_current ?? item.current_score ?? 0;
-                    const max = item.weighted_max ?? item.max_score ?? 100;
+                  {scoreBreakdown.map((raw, i) => {
+                    const item = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+                    const name = toText(item.category || item.name) || `Category ${i + 1}`;
+                    const s = Number(item.score ?? item.value ?? item.weighted_current ?? item.current_score) || 0;
+                    const max = Number(item.weighted_max ?? item.max_score) || 100;
                     const pct = max > 0 ? Math.round((s / max) * 100) : s;
                     return (
                       <div key={i} className="space-y-1">
@@ -256,12 +293,12 @@ function ResultsView({
 
           {/* Strengths & Gaps */}
           <div className="grid gap-6 sm:grid-cols-2">
-            {assessment?.strengths && (
+            {strengths.length > 0 && (
               <Card>
                 <CardHeader><CardTitle className="text-base">Strengths</CardTitle></CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {assessment.strengths.map((s, i) => (
+                    {strengths.map((s, i) => (
                       <li key={i} className="flex gap-2 text-sm">
                         <span className="shrink-0 text-green-600">+</span>
                         {toText(s)}
@@ -271,12 +308,12 @@ function ResultsView({
                 </CardContent>
               </Card>
             )}
-            {assessment?.gaps && (
+            {gaps.length > 0 && (
               <Card>
                 <CardHeader><CardTitle className="text-base">Gaps</CardTitle></CardHeader>
                 <CardContent>
                   <ul className="space-y-2">
-                    {assessment.gaps.map((g, i) => (
+                    {gaps.map((g, i) => (
                       <li key={i} className="flex gap-2 text-sm">
                         <span className="shrink-0 text-red-500">-</span>
                         {toText(g)}
@@ -289,30 +326,30 @@ function ResultsView({
           </div>
 
           {/* Score Projection */}
-          {projection && (
+          {(Number(projection.current_score) > 0 || Number(projection.estimated_improved_score) > 0) && (
             <Card>
               <CardHeader><CardTitle className="text-base">Improvement Potential</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4">
                   <div className="text-center">
-                    <p className="text-2xl font-bold">{projection.current_score}</p>
+                    <p className="text-2xl font-bold">{Number(projection.current_score) || 0}</p>
                     <p className="text-xs text-muted-foreground">Current</p>
                   </div>
                   <span className="text-2xl text-muted-foreground">&rarr;</span>
                   <div className="text-center">
                     <p className="text-2xl font-bold text-green-600">
-                      {projection.estimated_improved_score}
+                      {Number(projection.estimated_improved_score) || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">Potential</p>
                   </div>
                   <div className="ml-auto text-center">
                     <p className="text-lg font-semibold text-green-600">
-                      +{projection.potential_gain}
+                      +{Number(projection.potential_gain) || 0}
                     </p>
                     <p className="text-xs text-muted-foreground">points</p>
                   </div>
                 </div>
-                {projection.summary && (
+                {typeof projection.summary === "string" && projection.summary && (
                   <p className="mt-3 text-sm text-muted-foreground">{projection.summary}</p>
                 )}
               </CardContent>
@@ -322,12 +359,12 @@ function ResultsView({
 
         {/* Improvements Tab */}
         <TabsContent value="improvements" className="space-y-6">
-          {improvements?.top_3_priority_actions && improvements.top_3_priority_actions.length > 0 && (
+          {topActions.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Top Priority Actions</CardTitle></CardHeader>
               <CardContent>
                 <ol className="list-decimal space-y-2 pl-5">
-                  {improvements.top_3_priority_actions.map((a, i) => (
+                  {topActions.map((a, i) => (
                     <li key={i} className="text-sm">{toText(a)}</li>
                   ))}
                 </ol>
@@ -335,12 +372,12 @@ function ResultsView({
             </Card>
           )}
 
-          {improvements?.missing_keywords && improvements.missing_keywords.length > 0 && (
+          {missingKeywords.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Missing Keywords</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {improvements.missing_keywords.map((kw, i) => (
+                  {missingKeywords.map((kw, i) => (
                     <Badge key={i} variant="secondary">{toText(kw)}</Badge>
                   ))}
                 </div>
@@ -348,12 +385,12 @@ function ResultsView({
             </Card>
           )}
 
-          {improvements?.suggestions && (
+          {suggestions.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Improvement Suggestions</CardTitle></CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {improvements.suggestions.map((s, i) => (
+                  {suggestions.map((s, i) => (
                     <li key={i} className="text-sm">{toText(s)}</li>
                   ))}
                 </ul>
@@ -361,12 +398,12 @@ function ResultsView({
             </Card>
           )}
 
-          {improvements?.ats_formatting_tips && (
+          {atsTips.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">ATS Formatting Tips</CardTitle></CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {improvements.ats_formatting_tips.map((t, i) => (
+                  {atsTips.map((t, i) => (
                     <li key={i} className="text-sm">{toText(t)}</li>
                   ))}
                 </ul>
@@ -377,12 +414,12 @@ function ResultsView({
 
         {/* Improved Resume Tab */}
         <TabsContent value="resume" className="space-y-6">
-          {improvedResume?.changes_made && (
+          {changesMade.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Changes Made</CardTitle></CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {improvedResume.changes_made.map((c, i) => (
+                  {changesMade.map((c, i) => (
                     <li key={i} className="text-sm">{toText(c)}</li>
                   ))}
                 </ul>
@@ -390,12 +427,12 @@ function ResultsView({
             </Card>
           )}
 
-          {improvedResume?.keywords_added && improvedResume.keywords_added.length > 0 && (
+          {keywordsAdded.length > 0 && (
             <Card>
               <CardHeader><CardTitle className="text-base">Keywords Added</CardTitle></CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {improvedResume.keywords_added.map((kw, i) => (
+                  {keywordsAdded.map((kw, i) => (
                     <Badge key={i} variant="secondary">{toText(kw)}</Badge>
                   ))}
                 </div>
@@ -411,37 +448,40 @@ function ResultsView({
 
         {/* Jobs Tab */}
         <TabsContent value="jobs" className="space-y-4">
-          {jobs?.total_found != null && (
+          {Number(jobs.total_found) > 0 && (
             <p className="text-sm text-muted-foreground">
-              Found {jobs.total_found} relevant jobs
-              {jobs.search_query && <> for &ldquo;{jobs.search_query}&rdquo;</>}
-              {jobs.search_location && <> in {jobs.search_location}</>}
+              Found {Number(jobs.total_found)} relevant jobs
+              {typeof jobs.search_query === "string" && jobs.search_query && <> for &ldquo;{jobs.search_query}&rdquo;</>}
+              {typeof jobs.search_location === "string" && jobs.search_location && <> in {jobs.search_location}</>}
             </p>
           )}
 
-          {jobs?.jobs?.map((job, i) => (
-            <Card key={i}>
-              <CardContent className="py-4">
-                <h4 className="font-medium">{job.title || job.job_title}</h4>
-                <p className="text-sm text-muted-foreground">
-                  {job.company || job.company_name}
-                  {job.location && <> &mdash; {job.location}</>}
-                </p>
-                {job.url && (
-                  <a
-                    href={job.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-1 inline-block text-sm text-primary underline"
-                  >
-                    View Job
-                  </a>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+          {jobList.map((raw, i) => {
+            const job = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>;
+            return (
+              <Card key={i}>
+                <CardContent className="py-4">
+                  <h4 className="font-medium">{toText(job.title || job.job_title) || "Untitled"}</h4>
+                  <p className="text-sm text-muted-foreground">
+                    {toText(job.company || job.company_name)}
+                    {job.location ? <> &mdash; {toText(job.location)}</> : null}
+                  </p>
+                  {typeof job.url === "string" && job.url && (
+                    <a
+                      href={job.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-block text-sm text-primary underline"
+                    >
+                      View Job
+                    </a>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })}
 
-          {(!jobs?.jobs || jobs.jobs.length === 0) && (
+          {jobList.length === 0 && (
             <p className="text-center text-muted-foreground">No job recommendations available</p>
           )}
         </TabsContent>

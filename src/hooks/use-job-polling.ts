@@ -12,20 +12,38 @@ export function useJobPolling() {
   const [polling, setPolling] = useState(false);
   const [pollError, setPollError] = useState<string | null>(null);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const errorCountRef = useRef(0);
+  const stoppedRef = useRef(false);
+  const pollingRef = useRef(false);
 
   const stop = useCallback(() => {
+    stoppedRef.current = true;
+    pollingRef.current = false;
     if (intervalRef.current) {
       clearInterval(intervalRef.current);
       intervalRef.current = null;
+    }
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
     setPolling(false);
   }, []);
 
   const poll = useCallback(async (id: string) => {
+    // Skip if already stopped or another poll is in-flight
+    if (stoppedRef.current || pollingRef.current) return;
+    pollingRef.current = true;
+
     try {
       const res = await fetch(`/api/cekcv/status?jobId=${encodeURIComponent(id)}`);
+
+      // Check again after await — could have been stopped while waiting
+      if (stoppedRef.current) return;
+
       const data = await res.json();
+      if (stoppedRef.current) return;
 
       if (!res.ok || data.error) {
         errorCountRef.current++;
@@ -43,24 +61,28 @@ export function useJobPolling() {
         stop();
       }
     } catch (err) {
+      if (stoppedRef.current) return;
       errorCountRef.current++;
       if (errorCountRef.current >= MAX_ERRORS) {
         stop();
         setPollError(err instanceof Error ? err.message : "Lost connection to server");
       }
+    } finally {
+      pollingRef.current = false;
     }
   }, [stop]);
 
   const start = useCallback(
     (id: string) => {
       stop();
+      stoppedRef.current = false;
       setJobId(id);
       setStatus(null);
       setPollError(null);
       setPolling(true);
       errorCountRef.current = 0;
       // Small delay before first poll to let Init Job Status write the row
-      setTimeout(() => poll(id), 1000);
+      timeoutRef.current = setTimeout(() => poll(id), 1000);
       intervalRef.current = setInterval(() => poll(id), POLL_INTERVAL);
     },
     [poll, stop]
