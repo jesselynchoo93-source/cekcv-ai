@@ -14,7 +14,7 @@ export const workflows: WorkflowConfig[] = [
     description:
       "Upload your CV and job description to get AI-powered scoring, improvement advice, and job recommendations.",
     webhookPath: "/webhook/308876b5-b973-42b3-8dc7-d3c3925a5665",
-    statusPath: "/webhook/cekcv-status",
+    statusPath: "/webhook/cekcv-poll-status",
     type: "individual",
   },
   {
@@ -23,7 +23,7 @@ export const workflows: WorkflowConfig[] = [
     description:
       "Upload multiple CVs to score and rank candidates against a job role using 3 AI models.",
     webhookPath: "/webhook/429f9dea-6f42-4918-9672-95ee3257a79a",
-    statusPath: "/webhook/cekcv-status",
+    statusPath: "/webhook/cekcv-poll-status",
     type: "company",
   },
 ];

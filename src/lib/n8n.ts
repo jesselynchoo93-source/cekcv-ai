@@ -61,11 +61,11 @@ export async function submitCompany(formData: FormData): Promise<SubmitResponse>
 
 export async function pollStatus(jobId: string): Promise<StatusResponse> {
   const res = await fetch(
-    `${N8N_BASE_URL}/webhook/308876b5-b973-42b3-8dc7-d3c3925a5665`,
+    `${N8N_BASE_URL}/webhook/cekcv-poll-status`,
     {
       method: "POST",
       headers: { ...N8N_HEADERS, "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "check-status", jobId }),
+      body: JSON.stringify({ jobId }),
     }
   );
   const data = await parseJsonResponse<StatusResponse | StatusResponse[]>(res);

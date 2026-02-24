@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,22 +22,6 @@ const STEPS: Record<string, { label: string; icon: string }> = {
   complete: { label: "Analysis complete!", icon: "7" },
 };
 
-function useElapsedTime(running: boolean) {
-  const [elapsed, setElapsed] = useState(0);
-  const startRef = useRef(Date.now());
-
-  useEffect(() => {
-    if (!running) return;
-    startRef.current = Date.now();
-    setElapsed(0);
-    const id = setInterval(() => setElapsed(Math.floor((Date.now() - startRef.current) / 1000)), 1000);
-    return () => clearInterval(id);
-  }, [running]);
-
-  const mins = Math.floor(elapsed / 60);
-  const secs = elapsed % 60;
-  return mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
-}
 
 export function CekCVIndividual() {
   const [file, setFile] = useState<File | null>(null);
@@ -464,7 +448,6 @@ function ProgressView({
 }) {
   const currentStep = status?.step || "started";
   const progress = status?.progress || 0;
-  const elapsedTime = useElapsedTime(true);
   const stepOrder = Object.keys(STEPS);
   const currentIdx = stepOrder.indexOf(currentStep);
   const description = status?.stepDescription || STEPS[currentStep]?.label || "Processing...";
@@ -472,10 +455,7 @@ function ProgressView({
   return (
     <Card className="mx-auto max-w-2xl">
       <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>Analyzing Your CV</CardTitle>
-          <span className="text-sm text-muted-foreground">{elapsedTime}</span>
-        </div>
+        <CardTitle>Analyzing Your CV</CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-2">
