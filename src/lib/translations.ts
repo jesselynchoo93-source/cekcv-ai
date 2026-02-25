@@ -121,9 +121,12 @@ export const translations = {
 
     // Trust / social proof
     trustTitle: { en: "Trusted by professionals across Indonesia", id: "Dipercaya profesional di seluruh Indonesia" },
+    companyTrustTitle: { en: "Trusted by HR teams across Indonesia", id: "Dipercaya tim HR di seluruh Indonesia" },
     trustUsersCount: { en: "2,400+ CVs analyzed", id: "2.400+ CV telah dianalisis" },
+    companyTrustUsersCount: { en: "1,200+ candidates screened", id: "1.200+ kandidat telah di-screening" },
     trustRating: { en: "4.8 out of 5", id: "4,8 dari 5" },
     trustReviewCount: { en: "based on 380+ reviews", id: "berdasarkan 380+ review" },
+    companyTrustReviewCount: { en: "based on 150+ HR reviews", id: "berdasarkan 150+ review HR" },
 
     footerTagline: {
       en: "AI-powered CV analysis using GPT, Claude & Gemini for unbiased scoring",
@@ -292,6 +295,45 @@ export const translations = {
       text: {
         en: "Used it before applying to my dream job. The improved CV version got me past the ATS screening for the first time.",
         id: "Saya pakai sebelum apply ke dream job saya. Versi CV yang sudah diperbaiki berhasil lolos ATS screening untuk pertama kalinya.",
+      },
+      rating: 4,
+    },
+  ],
+  // ── Company Testimonials (HR professionals) ──
+  companyTestimonials: [
+    {
+      name: "Diana Kusuma",
+      role: { en: "HR Manager at Tokopedia", id: "HR Manager di Tokopedia" },
+      text: {
+        en: "We used to spend 3 days screening 200+ CVs. Now we get a ranked shortlist in under an hour. The AI scoring is surprisingly consistent.",
+        id: "Dulu kami butuh 3 hari untuk screening 200+ CV. Sekarang dapat shortlist ter-ranking dalam kurang dari satu jam. Scoring AI-nya konsisten banget.",
+      },
+      rating: 5,
+    },
+    {
+      name: "Fajar Hidayat",
+      role: { en: "Talent Acquisition Lead at Gojek", id: "Talent Acquisition Lead di Gojek" },
+      text: {
+        en: "The multi-model approach gives us more confidence in the rankings. No single AI bias — it's like having 3 independent reviewers.",
+        id: "Pendekatan multi-model memberi kami lebih percaya diri dengan ranking-nya. Tidak ada bias AI tunggal — seperti punya 3 reviewer independen.",
+      },
+      rating: 5,
+    },
+    {
+      name: "Mega Anggraini",
+      role: { en: "People Operations at Bukalapak", id: "People Operations di Bukalapak" },
+      text: {
+        en: "Finally, a screening tool that evaluates candidates fairly. The detailed breakdown per candidate saves us hours of manual review.",
+        id: "Akhirnya ada tool screening yang menilai kandidat secara adil. Breakdown detail per kandidat menghemat waktu review manual berjam-jam.",
+      },
+      rating: 5,
+    },
+    {
+      name: "Rendi Pratama",
+      role: { en: "Recruitment Specialist at Traveloka", id: "Recruitment Specialist di Traveloka" },
+      text: {
+        en: "We integrated CekCV into our hiring pipeline. The batch upload feature alone cut our screening time by 80%.",
+        id: "Kami integrasikan CekCV ke pipeline hiring kami. Fitur batch upload saja sudah memangkas waktu screening 80%.",
       },
       rating: 4,
     },

@@ -241,11 +241,15 @@ export default function Dashboard() {
       {/* Trust & Testimonials */}
       <section className="border-t bg-muted/20">
         <div className="mx-auto max-w-5xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold">{t(l.trustTitle, locale)}</h2>
+          <h2 className="text-center text-xl font-semibold">
+            {isIndividual ? t(l.trustTitle, locale) : t(l.companyTrustTitle, locale)}
+          </h2>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
             <div className="text-center">
-              <p className="text-2xl font-bold cekcv-gradient-text">{t(l.trustUsersCount, locale)}</p>
+              <p className="text-2xl font-bold cekcv-gradient-text">
+                {isIndividual ? t(l.trustUsersCount, locale) : t(l.companyTrustUsersCount, locale)}
+              </p>
             </div>
             <div className="hidden h-8 w-px bg-border sm:block" />
             <div className="flex flex-col items-center">
@@ -255,12 +259,14 @@ export default function Dashboard() {
                 ))}
               </div>
               <p className="mt-1 text-sm font-semibold">{t(l.trustRating, locale)}</p>
-              <p className="text-xs text-muted-foreground">{t(l.trustReviewCount, locale)}</p>
+              <p className="text-xs text-muted-foreground">
+                {isIndividual ? t(l.trustReviewCount, locale) : t(l.companyTrustReviewCount, locale)}
+              </p>
             </div>
           </div>
 
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
-            {translations.testimonials.map((review, i) => (
+            {(isIndividual ? translations.testimonials : translations.companyTestimonials).map((review, i) => (
               <div key={i} className="rounded-xl border bg-card p-5">
                 <div className="flex items-center gap-0.5">
                   {[...Array(review.rating)].map((_, j) => (
@@ -285,62 +291,62 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Get Started — actual navigation */}
+      {/* Get Started — only show the card for the active mode */}
       <section className="border-t" ref={getStartedRef}>
-        <div className="mx-auto max-w-5xl px-6 py-16">
+        <div className="mx-auto max-w-3xl px-6 py-16">
           <h2 className="text-center text-xl font-semibold">{t(l.getStarted, locale)}</h2>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2">
-            {/* Individual card */}
-            <Link href="/apps/cekcv-individual">
-              <div className={`cekcv-glass group h-full rounded-2xl p-6 transition-all hover:cekcv-glow ${isIndividual ? "ring-2 ring-green-500/50" : ""}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
-                      <FileText className="h-5 w-5" />
+          <div className="mt-8">
+            {isIndividual ? (
+              <Link href="/apps/cekcv-individual">
+                <div className="cekcv-glass group rounded-2xl p-6 transition-all hover:cekcv-glow ring-2 ring-green-500/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
+                        <FileText className="h-5 w-5" />
+                      </div>
+                      <h3 className="text-lg font-semibold">CekCV Individual</h3>
                     </div>
-                    <h3 className="text-lg font-semibold">CekCV Individual</h3>
+                    <Badge variant="default">individual</Badge>
                   </div>
-                  <Badge variant="default">individual</Badge>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {locale === "en"
+                      ? "Upload your CV and job description to get AI-powered scoring, improvement advice, and job recommendations."
+                      : "Upload CV dan job description untuk mendapatkan scoring AI, saran perbaikan, dan rekomendasi lowongan kerja."}
+                  </p>
+                  <div className="mt-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full cekcv-gradient px-4 py-1.5 text-sm font-medium text-white">
+                      {t(l.startAnalysis, locale)}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {locale === "en"
-                    ? "Upload your CV and job description to get AI-powered scoring, improvement advice, and job recommendations."
-                    : "Upload CV dan job description untuk mendapatkan scoring AI, saran perbaikan, dan rekomendasi lowongan kerja."}
-                </p>
-                <div className="mt-4">
-                  <span className="inline-flex items-center gap-1.5 rounded-full cekcv-gradient px-4 py-1.5 text-sm font-medium text-white">
-                    {t(l.startAnalysis, locale)}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
-                </div>
-              </div>
-            </Link>
-
-            {/* Company card */}
-            <Link href="/apps/cekcv-company">
-              <div className={`cekcv-glass group h-full rounded-2xl p-6 transition-all hover:cekcv-glow ${!isIndividual ? "ring-2 ring-green-500/50" : ""}`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
-                      <Users className="h-5 w-5" />
+              </Link>
+            ) : (
+              <Link href="/apps/cekcv-company">
+                <div className="cekcv-glass group rounded-2xl p-6 transition-all hover:cekcv-glow ring-2 ring-green-500/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
+                        <Users className="h-5 w-5" />
+                      </div>
+                      <h3 className="text-lg font-semibold">CekCV Company</h3>
                     </div>
-                    <h3 className="text-lg font-semibold">CekCV Company</h3>
+                    <Badge variant="secondary">company</Badge>
                   </div>
-                  <Badge variant="secondary">company</Badge>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    {locale === "en"
+                      ? "Upload multiple CVs to score and rank candidates against a job role using 3 AI models."
+                      : "Upload banyak CV untuk menilai dan me-ranking kandidat terhadap sebuah posisi menggunakan 3 model AI."}
+                  </p>
+                  <div className="mt-4">
+                    <span className="inline-flex items-center gap-1.5 rounded-full cekcv-gradient px-4 py-1.5 text-sm font-medium text-white">
+                      {t(l.startScreening, locale)}
+                      <ArrowRight className="h-3.5 w-3.5" />
+                    </span>
+                  </div>
                 </div>
-                <p className="mt-3 text-sm text-muted-foreground">
-                  {locale === "en"
-                    ? "Upload multiple CVs to score and rank candidates against a job role using 3 AI models."
-                    : "Upload banyak CV untuk menilai dan me-ranking kandidat terhadap sebuah posisi menggunakan 3 model AI."}
-                </p>
-                <div className="mt-4">
-                  <span className="inline-flex items-center gap-1.5 rounded-full cekcv-gradient px-4 py-1.5 text-sm font-medium text-white">
-                    {t(l.startScreening, locale)}
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </span>
-                </div>
-              </div>
-            </Link>
+              </Link>
+            )}
           </div>
         </div>
       </section>
