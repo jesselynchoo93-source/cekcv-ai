@@ -117,7 +117,7 @@ export const translations = {
     getStarted: { en: "Get started", id: "Mulai sekarang" },
     tryNow: { en: "Try now", id: "Coba sekarang" },
     startAnalysis: { en: "Start Analysis", id: "Mulai Analisis" },
-    startScreening: { en: "Start Screening", id: "Mulai Screening" },
+    startScreening: { en: "Start Batch Screening", id: "Mulai Batch Screening" },
 
     // Trust / social proof
     trustTitle: { en: "Trusted by professionals across Indonesia", id: "Dipercaya profesional di seluruh Indonesia" },
@@ -131,6 +131,10 @@ export const translations = {
     footerTagline: {
       en: "AI-powered CV analysis using GPT, Claude & Gemini for unbiased scoring",
       id: "Analisis CV berbasis AI menggunakan GPT, Claude & Gemini untuk penilaian tanpa bias",
+    },
+    disclaimer: {
+      en: "This project was built for the N8N Automation Competition by Anjas Maradita \u2014 Belajar AI Indonesia. All names, companies, and testimonials shown are fictional and for demonstration purposes only. By uploading your CV, you acknowledge that your file is sent to third-party AI services (OpenAI, Anthropic, Google) for analysis. Files are processed in-session and not permanently stored.",
+      id: "Proyek ini dibuat untuk Kompetisi Automasi N8N oleh Anjas Maradita \u2014 Belajar AI Indonesia. Semua nama, perusahaan, dan testimoni yang ditampilkan adalah fiktif dan hanya untuk keperluan demo. Dengan meng-upload CV, kamu menyetujui bahwa file dikirim ke layanan AI pihak ketiga (OpenAI, Anthropic, Google) untuk dianalisis. File diproses dalam sesi dan tidak disimpan secara permanen.",
     },
   },
 

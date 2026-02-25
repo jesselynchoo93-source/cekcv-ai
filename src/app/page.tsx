@@ -360,6 +360,9 @@ export default function Dashboard() {
         <p className="mt-1 text-xs text-muted-foreground">
           {t(l.footerTagline, locale)}
         </p>
+        <p className="mx-auto mt-4 max-w-xl text-[11px] leading-relaxed text-muted-foreground/50">
+          {t(l.disclaimer, locale)}
+        </p>
       </footer>
     </div>
   );
