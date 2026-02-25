@@ -360,9 +360,14 @@ export default function Dashboard() {
         <p className="mt-1 text-xs text-muted-foreground">
           {t(l.footerTagline, locale)}
         </p>
-        <p className="mx-auto mt-4 max-w-xl text-[11px] leading-relaxed text-muted-foreground/50">
-          {t(l.disclaimer, locale)}
-        </p>
+        <details className="mx-auto mt-3 max-w-xl">
+          <summary className="cursor-pointer text-[11px] text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors">
+            Disclaimer
+          </summary>
+          <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground/40">
+            {t(l.disclaimer, locale)}
+          </p>
+        </details>
       </footer>
     </div>
   );
