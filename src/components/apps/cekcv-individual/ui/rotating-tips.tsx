@@ -1,34 +1,44 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Lightbulb } from "lucide-react";
-import { ROTATING_TIPS } from "../constants";
+import { useLanguage } from "@/contexts/language-context";
+import { translations } from "@/lib/translations";
 
 export function RotatingTips() {
+  const { locale } = useLanguage();
+  const tips = translations.tips;
   const [index, setIndex] = useState(0);
-  const [visible, setVisible] = useState(true);
+  const [fading, setFading] = useState(false);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setVisible(false);
-      setTimeout(() => {
-        setIndex((prev) => (prev + 1) % ROTATING_TIPS.length);
-        setVisible(true);
-      }, 300);
-    }, 10000);
-
-    return () => clearInterval(interval);
+  const advance = useCallback(() => {
+    setFading(true);
   }, []);
+
+  // Rotate every 8 seconds
+  useEffect(() => {
+    const interval = setInterval(advance, 8000);
+    return () => clearInterval(interval);
+  }, [advance]);
+
+  // When fade-out completes, swap text and fade back in
+  const handleTransitionEnd = useCallback(() => {
+    if (fading) {
+      setIndex((prev) => (prev + 1) % tips.length);
+      setFading(false);
+    }
+  }, [fading, tips.length]);
 
   return (
     <div className="flex items-start gap-2 rounded-lg bg-muted/50 px-4 py-3">
       <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-500" />
       <p
         className={`text-sm text-muted-foreground transition-opacity duration-300 ${
-          visible ? "opacity-100" : "opacity-0"
+          fading ? "opacity-0" : "opacity-100"
         }`}
+        onTransitionEnd={handleTransitionEnd}
       >
-        {ROTATING_TIPS[index]}
+        {tips[index][locale]}
       </p>
     </div>
   );

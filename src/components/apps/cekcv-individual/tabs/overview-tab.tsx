@@ -1,8 +1,6 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import {
   Tooltip,
   TooltipContent,
@@ -14,7 +12,14 @@ import type { CekCVResult } from "../types";
 
 const RadarChart = dynamic(
   () => import("../charts/radar-chart").then((m) => m.RadarChart),
-  { ssr: false, loading: () => <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">Loading chart...</div> }
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
+        Loading chart...
+      </div>
+    ),
+  }
 );
 
 interface OverviewTabProps {
@@ -28,108 +33,98 @@ export function OverviewTab({ result, role }: OverviewTabProps) {
 
   return (
     <div className="space-y-6">
-      {/* Score summary line */}
-      <p className="text-center text-muted-foreground">
-        Your CV scores{" "}
-        <span className="font-semibold text-foreground">{score}/100</span> for the{" "}
-        <span className="font-semibold text-foreground">{role || "target"}</span> role
-      </p>
-
       {/* Score Gauge */}
       <div className="flex justify-center">
         <ScoreGauge
           currentScore={score}
           potentialScore={score_projection.estimated_improved_score}
-          size={220}
+          size={200}
         />
       </div>
 
-      {/* Radar Chart */}
-      {score_breakdown.length >= 3 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Skill Match: Your CV vs Job Requirements</CardTitle>
-          </CardHeader>
-          <CardContent>
+      {/* Radar + Breakdown side by side */}
+      <div className={`grid gap-6 ${score_breakdown.length >= 3 ? "lg:grid-cols-2" : ""}`}>
+        {score_breakdown.length >= 3 && (
+          <div className="rounded-xl border p-4">
+            <h3 className="mb-3 text-sm font-semibold">Skill Match Profile</h3>
             <RadarChart data={score_breakdown} />
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
 
-      {/* Score Breakdown Bars */}
-      {score_breakdown.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Score Breakdown</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+        {score_breakdown.length > 0 && (
+          <div className="rounded-xl border p-4">
+            <h3 className="mb-3 text-sm font-semibold">Score Breakdown</h3>
+            <div className="space-y-2.5">
               {score_breakdown.map((item, i) => {
-                const pct = item.weighted_max > 0
-                  ? Math.round((item.weighted_current / item.weighted_max) * 100)
-                  : item.score;
+                const pct =
+                  item.weighted_max > 0
+                    ? Math.round((item.weighted_current / item.weighted_max) * 100)
+                    : item.score;
                 return (
                   <Tooltip key={i}>
                     <TooltipTrigger asChild>
                       <div className="cursor-default space-y-1">
-                        <div className="flex justify-between text-sm">
-                          <span>{item.category}</span>
-                          <span className="font-medium tabular-nums">
+                        <div className="flex justify-between text-xs">
+                          <span className="truncate pr-2">{item.category}</span>
+                          <span className="shrink-0 font-medium tabular-nums">
                             {item.weighted_current}/{item.weighted_max}
                           </span>
                         </div>
-                        <Progress value={pct} className="h-2" />
+                        <div className="h-1.5 overflow-hidden rounded-full bg-muted/30">
+                          <div
+                            className="cekcv-gradient h-full rounded-full transition-all duration-700"
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">
-                        <span className="font-medium">{item.category}</span>: {pct}% match
-                        ({item.weighted_current} of {item.weighted_max} points)
+                        <span className="font-medium">{item.category}</span>: {pct}% match (
+                        {item.weighted_current} of {item.weighted_max} points)
                       </p>
                     </TooltipContent>
                   </Tooltip>
                 );
               })}
             </div>
-          </CardContent>
-        </Card>
-      )}
+          </div>
+        )}
+      </div>
 
       {/* Strengths & Gaps */}
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid gap-6 sm:grid-cols-2">
         {current_assessment.strengths.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">What makes you a strong fit</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {current_assessment.strengths.map((s, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
-                    <span className="line-clamp-2">{s}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              Strengths
+            </h3>
+            <div className="space-y-1.5">
+              {current_assessment.strengths.map((s, i) => (
+                <div key={i} className="flex items-start gap-2 pl-1 text-sm">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
+                  <span className="line-clamp-2">{s}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
         {current_assessment.gaps.length > 0 && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Areas to strengthen for this role</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-2">
-                {current_assessment.gaps.map((g, i) => (
-                  <li key={i} className="flex items-start gap-2 text-sm">
-                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-red-500" />
-                    <span className="line-clamp-2">{g}</span>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+          <div className="space-y-2">
+            <h3 className="flex items-center gap-1.5 text-sm font-semibold">
+              <XCircle className="h-4 w-4 text-red-500" />
+              Gaps
+            </h3>
+            <div className="space-y-1.5">
+              {current_assessment.gaps.map((g, i) => (
+                <div key={i} className="flex items-start gap-2 pl-1 text-sm">
+                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
+                  <span className="line-clamp-2">{g}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </div>

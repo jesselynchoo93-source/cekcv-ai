@@ -1,11 +1,11 @@
-export const STEPS: Record<string, { label: string; icon: string }> = {
-  started: { label: "Starting analysis...", icon: "1" },
-  analyzing: { label: "AI is reading your CV and job description...", icon: "2" },
-  scoring_complete: { label: "3 AI models have scored your CV", icon: "3" },
-  improving: { label: "Generating improvement advice...", icon: "4" },
-  resume_generated: { label: "Creating your improved CV...", icon: "5" },
-  jobs_found: { label: "Found relevant jobs for you", icon: "6" },
-  complete: { label: "Analysis complete!", icon: "7" },
+export const STEPS: Record<string, { label: string; activeDescription: string; icon: string }> = {
+  started:          { label: "Upload",  activeDescription: "Sending your CV to our servers...",  icon: "Upload" },
+  analyzing:        { label: "Analyze", activeDescription: "3 AI models reading your CV...",     icon: "ScanSearch" },
+  scoring_complete: { label: "Score",   activeDescription: "Calculating match against job...",   icon: "BarChart3" },
+  improving:        { label: "Improve", activeDescription: "Generating personalized advice...",  icon: "Sparkles" },
+  resume_generated: { label: "Rewrite", activeDescription: "Building your optimized CV...",      icon: "FileEdit" },
+  jobs_found:       { label: "Match",   activeDescription: "Finding relevant job openings...",   icon: "Briefcase" },
+  complete:         { label: "Done",    activeDescription: "",                                   icon: "CheckCircle2" },
 };
 
 export const ROTATING_TIPS = [

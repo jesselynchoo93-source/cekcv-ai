@@ -71,7 +71,7 @@ export function parseResult(raw: Record<string, unknown>): CekCVResult {
     improved_resume: {
       changes_made: toStringArray(resume.changes_made),
       keywords_added: toStringArray(resume.keywords_added),
-      download_url: typeof resume.download_url === "string" ? resume.download_url : undefined,
+      download_url: extractDownloadUrl(resume),
     },
     recommended_jobs: {
       total_found: Number(jobs.total_found) || 0,
@@ -90,6 +90,28 @@ export function parseResult(raw: Record<string, unknown>): CekCVResult {
     },
     role: toText(raw.role),
   };
+}
+
+/** Extract download URL from various possible n8n/Google Drive response shapes */
+function extractDownloadUrl(resume: Record<string, unknown>): string | undefined {
+  if (typeof resume.download_url === "string" && resume.download_url) return resume.download_url;
+  if (resume.download_url && typeof resume.download_url === "object") {
+    const nested = resume.download_url as Record<string, unknown>;
+    if (typeof nested.url === "string") return nested.url;
+    if (typeof nested.webViewLink === "string") return nested.webViewLink;
+    if (typeof nested.webContentLink === "string") return nested.webContentLink;
+  }
+  if (typeof resume.webViewLink === "string") return resume.webViewLink;
+  if (typeof resume.webContentLink === "string") return resume.webContentLink;
+  if (typeof resume.file_url === "string") return resume.file_url;
+  if (typeof resume.drive_url === "string") return resume.drive_url;
+  if (typeof resume.google_drive_url === "string") return resume.google_drive_url;
+  return undefined;
+}
+
+/** Check if a URL points to Google Drive */
+export function isGoogleDriveUrl(url: string): boolean {
+  return url.includes("drive.google.com") || url.includes("docs.google.com");
 }
 
 /** Extract key requirements from a job description for preview */

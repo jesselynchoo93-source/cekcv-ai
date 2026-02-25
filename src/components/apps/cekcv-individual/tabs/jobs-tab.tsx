@@ -16,7 +16,6 @@ export function JobsTab({ result, role }: JobsTabProps) {
   const { recommended_jobs } = result;
   const { jobs, loading, error, search } = useDeferredJobs();
 
-  // Trigger deferred job search on mount
   useEffect(() => {
     if (recommended_jobs.jobs.length === 0) {
       search(role || recommended_jobs.search_query, recommended_jobs.search_location);
@@ -24,9 +23,9 @@ export function JobsTab({ result, role }: JobsTabProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Use deferred results if available, fall back to existing data
   const jobList = jobs.length > 0 ? jobs : recommended_jobs.jobs;
   const isLoading = loading && jobList.length === 0;
+  const hasMatchScores = jobList.some((j) => j.match_score != null);
 
   return (
     <div className="space-y-4">
@@ -35,15 +34,33 @@ export function JobsTab({ result, role }: JobsTabProps) {
         Similar roles you&apos;d be a good fit for
       </p>
 
-      {/* Search info */}
-      {(recommended_jobs.total_found > 0 || jobList.length > 0) && !isLoading && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Search className="h-4 w-4" />
-          <span>
+      {/* Search info + match quality summary */}
+      {!isLoading && jobList.length > 0 && (
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <Search className="h-4 w-4" />
             Found {jobList.length} relevant jobs
-            {recommended_jobs.search_query && <> for &ldquo;{recommended_jobs.search_query}&rdquo;</>}
-            {recommended_jobs.search_location && <> in {recommended_jobs.search_location}</>}
+            {recommended_jobs.search_query && (
+              <> for &ldquo;{recommended_jobs.search_query}&rdquo;</>
+            )}
           </span>
+
+          {hasMatchScores && (
+            <div className="flex items-center gap-3 text-xs">
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-green-500" />
+                {jobList.filter((j) => (j.match_score || 0) >= 80).length} strong
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-yellow-500" />
+                {jobList.filter((j) => (j.match_score || 0) >= 60 && (j.match_score || 0) < 80).length} moderate
+              </span>
+              <span className="flex items-center gap-1">
+                <span className="h-2 w-2 rounded-full bg-red-500" />
+                {jobList.filter((j) => (j.match_score || 0) < 60).length} low
+              </span>
+            </div>
+          )}
         </div>
       )}
 
@@ -55,7 +72,7 @@ export function JobsTab({ result, role }: JobsTabProps) {
             Finding matching jobs for you...
           </div>
           {[1, 2, 3].map((i) => (
-            <div key={i} className="rounded-lg border p-4">
+            <div key={i} className="rounded-xl border p-4">
               <Skeleton className="h-5 w-3/4" />
               <Skeleton className="mt-2 h-4 w-1/2" />
               <Skeleton className="mt-2 h-4 w-1/3" />
@@ -76,7 +93,7 @@ export function JobsTab({ result, role }: JobsTabProps) {
 
       {/* Error state */}
       {error && !isLoading && jobList.length === 0 && (
-        <div className="rounded-lg border border-destructive/20 bg-destructive/5 p-4 text-center">
+        <div className="rounded-xl border border-destructive/20 bg-destructive/5 p-4 text-center">
           <p className="text-sm text-destructive">{error}</p>
         </div>
       )}

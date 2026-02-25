@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { FileText, ArrowRight, Plus, Download, ExternalLink } from "lucide-react";
+import { isGoogleDriveUrl } from "../utils";
 import type { CekCVResult } from "../types";
 
 interface ResumeTabProps {
@@ -12,20 +13,22 @@ interface ResumeTabProps {
 }
 
 export function ResumeTab({ result, role }: ResumeTabProps) {
-  const { improved_resume } = result;
+  const { improved_resume, score_projection } = result;
+  const potentialGain = score_projection.potential_gain;
 
   return (
     <div className="space-y-6">
       {/* Header */}
       <p className="text-muted-foreground">
-        Your CV, optimized for <span className="font-semibold text-foreground">{role || "this role"}</span>
+        Your CV, optimized for{" "}
+        <span className="font-semibold text-foreground">{role || "this role"}</span>
       </p>
 
       {/* Download / Access CTA */}
-      <Card className="border-primary/30 bg-primary/5">
-        <CardContent className="flex items-center gap-4 py-5">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/10">
-            <FileText className="h-6 w-6 text-primary" />
+      <div className="cekcv-glass cekcv-glow rounded-2xl p-5">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full cekcv-gradient">
+            <FileText className="h-6 w-6 text-white" />
           </div>
           <div className="flex-1">
             <h3 className="font-semibold">Your improved CV has been generated</h3>
@@ -34,20 +37,67 @@ export function ResumeTab({ result, role }: ResumeTabProps) {
             </p>
           </div>
           {improved_resume.download_url ? (
-            <Button asChild>
-              <a href={improved_resume.download_url} target="_blank" rel="noopener noreferrer">
-                <Download className="mr-2 h-4 w-4" />
-                Download CV
-              </a>
-            </Button>
+            <div className="flex shrink-0 gap-2">
+              <Button asChild>
+                <a href={improved_resume.download_url} target="_blank" rel="noopener noreferrer">
+                  {isGoogleDriveUrl(improved_resume.download_url) ? (
+                    <>
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Open in Drive
+                    </>
+                  ) : (
+                    <>
+                      <Download className="mr-2 h-4 w-4" />
+                      Download CV
+                    </>
+                  )}
+                </a>
+              </Button>
+              {isGoogleDriveUrl(improved_resume.download_url) && (
+                <Button variant="outline" asChild>
+                  <a
+                    href={improved_resume.download_url.replace(/\/edit.*|\/view.*/, "/export?format=pdf")}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    PDF
+                  </a>
+                </Button>
+              )}
+            </div>
           ) : (
-            <Button variant="outline" disabled>
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Saved to Drive
-            </Button>
+            <p className="shrink-0 text-sm text-muted-foreground">
+              Processing...
+            </p>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      {/* Score Impact */}
+      {potentialGain > 0 && (
+        <div className="rounded-xl border p-5">
+          <h3 className="mb-4 text-sm font-semibold">Score Impact</h3>
+          <div className="flex items-center justify-center gap-6">
+            <div className="text-center">
+              <p className="text-3xl font-bold text-muted-foreground tabular-nums">
+                {score_projection.current_score}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">Before</p>
+            </div>
+            <ArrowRight className="h-5 w-5 text-green-500" />
+            <div className="text-center">
+              <p className="text-3xl font-bold tabular-nums cekcv-gradient-text">
+                {score_projection.estimated_improved_score}
+              </p>
+              <p className="mt-1 text-xs text-muted-foreground">After improvements</p>
+            </div>
+            <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+              +{potentialGain} pts
+            </Badge>
+          </div>
+        </div>
+      )}
 
       {/* Changes Made */}
       {improved_resume.changes_made.length > 0 && (
@@ -75,7 +125,7 @@ export function ResumeTab({ result, role }: ResumeTabProps) {
       {improved_resume.keywords_added.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Job-specific keywords added to your CV</CardTitle>
+            <CardTitle className="text-base">Keywords added to your CV</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">

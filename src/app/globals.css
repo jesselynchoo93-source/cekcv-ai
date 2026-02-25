@@ -67,6 +67,12 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
+  /* CekCV brand */
+  --cekcv-brand-from: oklch(0.696 0.17 162.48);
+  --cekcv-brand-to: oklch(0.600 0.118 184.704);
+  --cekcv-brand-glow: oklch(0.696 0.17 162.48 / 25%);
+  --cekcv-glass-bg: oklch(1 0 0 / 60%);
+  --cekcv-glass-border: oklch(0.922 0 0 / 60%);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -101,6 +107,10 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.556 0 0);
+  /* CekCV brand (dark) */
+  --cekcv-brand-glow: oklch(0.696 0.17 162.48 / 15%);
+  --cekcv-glass-bg: oklch(0.205 0 0 / 60%);
+  --cekcv-glass-border: oklch(1 0 0 / 8%);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -127,9 +137,49 @@
 
 @keyframes pulse-ring {
   0%, 100% {
-    box-shadow: 0 0 0 0 oklch(0.205 0 0 / 20%);
+    box-shadow: 0 0 0 0 var(--cekcv-brand-glow);
   }
   50% {
-    box-shadow: 0 0 0 6px oklch(0.205 0 0 / 0%);
+    box-shadow: 0 0 0 8px oklch(0.696 0.17 162.48 / 0%);
   }
+}
+
+@keyframes cekcv-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* CekCV brand utilities */
+.cekcv-gradient {
+  background: linear-gradient(135deg, var(--cekcv-brand-from), var(--cekcv-brand-to));
+}
+
+.cekcv-glass {
+  background: var(--cekcv-glass-bg);
+  backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid var(--cekcv-glass-border);
+}
+
+.cekcv-glow {
+  box-shadow: 0 4px 24px var(--cekcv-brand-glow), 0 1px 4px oklch(0 0 0 / 8%);
+}
+
+.cekcv-gradient-text {
+  background: linear-gradient(135deg, var(--cekcv-brand-from), var(--cekcv-brand-to));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cekcv-progress-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--cekcv-brand-from) 0%,
+    oklch(0.66 0.145 172) 35%,
+    oklch(0.72 0.13 168) 50%,
+    oklch(0.66 0.145 172) 65%,
+    var(--cekcv-brand-from) 100%
+  );
+  background-size: 200% 100%;
+  animation: cekcv-shimmer 2.5s ease-in-out infinite;
 }
