@@ -1,6 +1,8 @@
 "use client";
 
 import { useAnimatedCounter } from "@/hooks/use-animated-counter";
+import { useLanguage } from "@/contexts/language-context";
+import { translations, t } from "@/lib/translations";
 
 interface ScoreGaugeProps {
   currentScore: number;
@@ -10,6 +12,8 @@ interface ScoreGaugeProps {
 
 export function ScoreGauge({ currentScore, potentialScore, size = 200 }: ScoreGaugeProps) {
   const animatedScore = useAnimatedCounter(currentScore);
+  const { locale } = useLanguage();
+  const r = translations.results;
   const center = size / 2;
   const strokeWidth = 12;
   const radius = center - strokeWidth;
@@ -84,13 +88,13 @@ export function ScoreGauge({ currentScore, potentialScore, size = 200 }: ScoreGa
           className="fill-muted-foreground"
           style={{ fontSize: size * 0.07 }}
         >
-          out of 100
+          {t(r.outOf100, locale)}
         </text>
       </svg>
       {potentialScore > currentScore && (
         <p className="mt-1 text-sm text-muted-foreground">
-          Potential: <span className="font-semibold text-green-500">{potentialScore}</span>
-          <span className="ml-1 text-xs">(+{potentialScore - currentScore} points)</span>
+          {t(r.potentialLabel, locale)}: <span className="font-semibold text-green-500">{potentialScore}</span>
+          <span className="ml-1 text-xs">(+{potentialScore - currentScore} {t(r.points, locale)})</span>
         </p>
       )}
     </div>

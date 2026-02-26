@@ -65,13 +65,25 @@ export function parseResult(raw: Record<string, unknown>): CekCVResult {
     improvements: {
       top_3_priority_actions: toStringArray(improvements.top_3_priority_actions),
       missing_keywords: toStringArray(improvements.missing_keywords),
-      suggestions: toStringArray(improvements.suggestions),
+      suggestions: asArray(improvements.suggestions).map((raw) => {
+      if (raw && typeof raw === "object") {
+        const obj = raw as Record<string, unknown>;
+        const text = toText(obj.suggestion || obj);
+        return {
+          title: typeof obj.title === "string" ? obj.title : text.split(/[.:;]/)[0].slice(0, 45).trim(),
+          text,
+        };
+      }
+      const text = toText(raw);
+      return { title: text.split(/[.:;]/)[0].slice(0, 45).trim(), text };
+    }),
       ats_formatting_tips: toStringArray(improvements.ats_formatting_tips),
     },
     improved_resume: {
       changes_made: toStringArray(resume.changes_made),
       keywords_added: toStringArray(resume.keywords_added),
       download_url: extractDownloadUrl(resume),
+      html: typeof resume.html === "string" ? resume.html : undefined,
     },
     recommended_jobs: {
       total_found: Number(jobs.total_found) || 0,
@@ -84,7 +96,8 @@ export function parseResult(raw: Record<string, unknown>): CekCVResult {
           company: toText(job.company || job.company_name),
           location: toText(job.location),
           url: typeof job.url === "string" ? job.url : "",
-          match_score: typeof job.match_score === "number" ? job.match_score : undefined,
+          match_score: typeof job.match_score === "number" ? job.match_score
+            : typeof job.relevance_score === "number" ? job.relevance_score : undefined,
         };
       }),
     },
@@ -94,6 +107,9 @@ export function parseResult(raw: Record<string, unknown>): CekCVResult {
 
 /** Extract download URL from various possible n8n/Google Drive response shapes */
 function extractDownloadUrl(resume: Record<string, unknown>): string | undefined {
+  // Check n8n Set Resume Link output fields first
+  if (typeof resume.drive_view_link === "string" && resume.drive_view_link) return resume.drive_view_link;
+  if (typeof resume.drive_download_link === "string" && resume.drive_download_link) return resume.drive_download_link;
   if (typeof resume.download_url === "string" && resume.download_url) return resume.download_url;
   if (resume.download_url && typeof resume.download_url === "object") {
     const nested = resume.download_url as Record<string, unknown>;
@@ -106,6 +122,10 @@ function extractDownloadUrl(resume: Record<string, unknown>): string | undefined
   if (typeof resume.file_url === "string") return resume.file_url;
   if (typeof resume.drive_url === "string") return resume.drive_url;
   if (typeof resume.google_drive_url === "string") return resume.google_drive_url;
+  // Build URL from drive_file_id if present
+  if (typeof resume.drive_file_id === "string" && resume.drive_file_id) {
+    return `https://drive.google.com/file/d/${resume.drive_file_id}/view`;
+  }
   return undefined;
 }
 

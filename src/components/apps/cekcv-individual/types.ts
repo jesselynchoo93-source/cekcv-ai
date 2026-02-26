@@ -25,10 +25,15 @@ export interface ScoreProjection {
   summary: string;
 }
 
+export interface Suggestion {
+  title: string;
+  text: string;
+}
+
 export interface Improvements {
   top_3_priority_actions: string[];
   missing_keywords: string[];
-  suggestions: string[];
+  suggestions: Suggestion[];
   ats_formatting_tips: string[];
 }
 
@@ -36,6 +41,7 @@ export interface ImprovedResume {
   changes_made: string[];
   keywords_added: string[];
   download_url?: string;
+  html?: string;
 }
 
 export interface JobMatch {

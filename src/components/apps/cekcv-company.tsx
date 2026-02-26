@@ -1,38 +1,117 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
+import {
+  Upload,
+  FileText,
+  X,
+  Users,
+  ScanSearch,
+  BarChart3,
+  LayoutList,
+  CheckCircle2,
+  Check,
+  Target,
+} from "lucide-react";
 import { useJobPolling } from "@/hooks/use-job-polling";
+import { useLanguage } from "@/contexts/language-context";
+import { translations, t } from "@/lib/translations";
+import { RotatingTips } from "@/components/apps/cekcv-individual/ui/rotating-tips";
+import { CompanyDashboard } from "@/components/apps/cekcv-company/dashboard";
 
-interface Candidate {
-  name: string;
-  email: string;
-  score: number;
-  status: string;
-  summary: string;
-  strengths: string[];
-  gaps: string[];
+// ── Company workflow steps ──
+const COMPANY_STEPS: Record<string, { label: string; icon: React.ElementType }> = {
+  started:    { label: "Upload",  icon: Upload },
+  analyzing:  { label: "Analyze", icon: ScanSearch },
+  scoring:    { label: "Score",   icon: BarChart3 },
+  ranking:    { label: "Rank",    icon: LayoutList },
+  complete:   { label: "Done",    icon: CheckCircle2 },
+};
+
+// Map n8n step keys to our visual step keys
+function normalizeStep(step: string, progress: number): string {
+  if (step === "started" || step === "uploading") return "started";
+  if (step === "analyzing" || step === "processing") return "analyzing";
+  if (step === "grading" || step === "scoring" || step === "scoring_complete") return "scoring";
+  if (step === "ranking" || step === "ranked" || step === "improving") return "ranking";
+  if (step === "complete" || step === "done") return "complete";
+  // Fallback: use progress to estimate step
+  if (progress >= 95) return "ranking";
+  if (progress >= 10) return "scoring";
+  if (progress > 0) return "analyzing";
+  return "started";
 }
 
-export function CekCVCompany() {
-  const [files, setFiles] = useState<FileList | null>(null);
+const MAX_FILES = 5;
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {}) {
+  const [files, setFiles] = useState<File[]>([]);
   const [jobDescription, setJobDescription] = useState("");
   const [roleName, setRoleName] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const { status, polling, pollError, start, reset } = useJobPolling();
+  const { status, polling, pollError, stepDescriptions, start, reset } = useJobPolling();
+  const { locale } = useLanguage();
+  const f = translations.companyForm;
+  const initialLoadedRef = useRef(false);
+
+  // Auto-load batch results from URL parameter
+  useEffect(() => {
+    if (initialBatchId && !initialLoadedRef.current) {
+      initialLoadedRef.current = true;
+      start(initialBatchId);
+    }
+  }, [initialBatchId, start]);
+
+  const addFiles = useCallback((incoming: FileList | File[]) => {
+    const newFiles: File[] = [];
+    for (let i = 0; i < incoming.length; i++) {
+      const file = incoming[i];
+      if (!file.name.match(/\.pdf$/i)) {
+        setError(t(f.uploadError, locale));
+        return;
+      }
+      newFiles.push(file);
+    }
+    setFiles((prev) => {
+      const combined = [...prev, ...newFiles];
+      if (combined.length > MAX_FILES) {
+        setError(t(f.maxFilesError, locale));
+        return prev;
+      }
+      setError(null);
+      return combined;
+    });
+  }, [locale, f.uploadError, f.maxFilesError]);
+
+  const removeFile = (index: number) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setDragActive(false);
+      if (e.dataTransfer.files?.length) addFiles(e.dataTransfer.files);
+    },
+    [addFiles]
+  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!files || files.length === 0 || !jobDescription.trim()) return;
+    if (files.length === 0 || !jobDescription.trim()) return;
 
     setSubmitting(true);
     setError(null);
@@ -42,8 +121,8 @@ export function CekCVCompany() {
       formData.append("jobDescription", jobDescription);
       formData.append("roleName", roleName || "Untitled Role");
 
-      for (let i = 0; i < files.length; i++) {
-        formData.append("file", files[i]);
+      for (const file of files) {
+        formData.append("file", file);
       }
 
       const res = await fetch("/api/cekcv/submit-company", {
@@ -53,14 +132,14 @@ export function CekCVCompany() {
       const data = await res.json();
 
       if (!data.success) {
-        setError(data.error || "Failed to start batch analysis");
+        setError(data.error || t(f.errorStart, locale));
         setSubmitting(false);
         return;
       }
 
       start(data.batchId || data.jobId);
     } catch {
-      setError("Failed to connect to the server");
+      setError(t(f.errorConnect, locale));
     } finally {
       setSubmitting(false);
     }
@@ -68,10 +147,11 @@ export function CekCVCompany() {
 
   const handleReset = () => {
     reset();
-    setFiles(null);
+    setFiles([]);
     setJobDescription("");
     setRoleName("");
     setError(null);
+    setDragActive(false);
     if (fileRef.current) fileRef.current.value = "";
   };
 
@@ -80,209 +160,527 @@ export function CekCVCompany() {
   const isError = status?.status === "error" || !!pollError;
   const isProcessing = polling || (status?.status === "processing" && !pollError);
 
-  // Form
+  // ── Form ──
   if (!isProcessing && !isComplete && !isError) {
     return (
-      <Card className="mx-auto max-w-2xl">
-        <CardHeader>
-          <CardTitle>Batch Candidate Screening</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="role-name">Role Name</Label>
-              <Input
-                id="role-name"
-                placeholder="e.g. Senior Software Engineer"
-                value={roleName}
-                onChange={(e) => setRoleName(e.target.value)}
-              />
+      <div className="cekcv-glass cekcv-glow mx-auto max-w-2xl rounded-2xl p-6 sm:p-8">
+        <div className="flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
+            <Users className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold">{t(f.title, locale)}</h2>
+            <p className="text-sm text-muted-foreground">{t(f.subtitle, locale)}</p>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+          {/* Role name */}
+          <div className="space-y-2">
+            <Label htmlFor="role-name">{t(f.labelRole, locale)}</Label>
+            <Input
+              id="role-name"
+              placeholder={t(f.rolePlaceholder, locale)}
+              value={roleName}
+              onChange={(e) => setRoleName(e.target.value)}
+            />
+          </div>
+
+          {/* Job description */}
+          <div className="space-y-2">
+            <Label htmlFor="job-desc-company">{t(f.labelJD, locale)}</Label>
+            <Textarea
+              id="job-desc-company"
+              placeholder={t(f.jdPlaceholder, locale)}
+              rows={6}
+              value={jobDescription}
+              onChange={(e) => setJobDescription(e.target.value)}
+            />
+
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs font-medium text-muted-foreground">{t(f.jdOrLabel, locale)}</span>
+              <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="job-desc-company">Job Description</Label>
-              <Textarea
-                id="job-desc-company"
-                placeholder="Paste the full job description..."
-                rows={6}
-                value={jobDescription}
+            <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+              <svg className="h-4 w-4 shrink-0 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <input
+                type="url"
+                placeholder={t(f.jdLinkedinPlaceholder, locale)}
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+                value={jobDescription.startsWith("http") ? jobDescription : ""}
                 onChange={(e) => setJobDescription(e.target.value)}
+                onFocus={(e) => {
+                  if (jobDescription && !jobDescription.startsWith("http")) {
+                    e.target.value = "";
+                  }
+                }}
               />
             </div>
+            <p className="text-xs text-muted-foreground/60">{t(f.jdLinkedinExample, locale)}</p>
+          </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="cv-files">CVs / Resumes (multiple PDF or DOCX)</Label>
-              <Input
-                ref={fileRef}
-                id="cv-files"
-                type="file"
-                accept=".pdf,.docx,.doc"
-                multiple
-                onChange={(e) => setFiles(e.target.files)}
-              />
-              {files && files.length > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {files.length} file{files.length > 1 ? "s" : ""} selected
-                </p>
-              )}
-            </div>
-
-            {error && <p className="text-sm text-destructive">{error}</p>}
-
-            <Button
-              type="submit"
-              disabled={!files || files.length === 0 || !jobDescription.trim() || submitting}
-              className="w-full"
+          {/* Drag-and-drop multi-file upload */}
+          <div className="space-y-2">
+            <Label>{t(f.labelCVs, locale)}</Label>
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
+              onDragLeave={() => setDragActive(false)}
+              onDrop={handleDrop}
+              onClick={() => fileRef.current?.click()}
+              className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-6 transition-colors ${
+                dragActive
+                  ? "border-green-500 bg-green-50 dark:bg-green-950/20"
+                  : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30"
+              }`}
             >
-              {submitting ? "Submitting..." : `Screen ${files?.length || 0} Candidate${(files?.length || 0) !== 1 ? "s" : ""}`}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    );
-  }
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+              </div>
+              <div className="text-center">
+                <p className="text-sm font-medium">
+                  {dragActive ? t(f.dropHover, locale) : t(f.dropText, locale)}
+                </p>
+                <p className="mt-1 text-xs text-muted-foreground">{t(f.fileTypes, locale)}</p>
+              </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".pdf"
+                multiple
+                className="hidden"
+                onChange={(e) => {
+                  if (e.target.files?.length) addFiles(e.target.files);
+                  if (fileRef.current) fileRef.current.value = "";
+                }}
+              />
+            </div>
 
-  // Processing
-  if (isProcessing && !isComplete) {
-    const progress = status?.progress || 0;
-    const candidateIdx = status?.candidateIndex || 0;
-    const totalCandidates = status?.totalCandidates || 1;
+            {/* File list */}
+            {files.length > 0 && (
+              <div className="space-y-2 pt-1">
+                {files.map((file, i) => (
+                  <div key={`${file.name}-${i}`} className="flex items-center gap-3 rounded-lg border bg-muted/20 px-3 py-2">
+                    <FileText className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{file.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatFileSize(file.size)}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); removeFile(i); }}
+                      className="rounded-full p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    >
+                      <X className="h-3.5 w-3.5" />
+                    </button>
+                  </div>
+                ))}
+                <p className="text-xs text-muted-foreground">
+                  {t(f.filesSelected, locale).replace("{count}", String(files.length))}
+                </p>
+              </div>
+            )}
+          </div>
 
-    return (
-      <Card className="mx-auto max-w-2xl">
-        <CardHeader>
-          <CardTitle>Screening Candidates</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <Progress value={progress} className="h-3" />
-          <p className="text-center text-lg font-medium">
-            {status?.stepDescription || "Starting batch analysis..."}
+          {error && <p className="text-sm text-destructive">{error}</p>}
+
+          <Button
+            type="submit"
+            disabled={files.length === 0 || !jobDescription.trim() || submitting}
+            className="w-full cekcv-gradient text-white hover:opacity-90"
+            size="lg"
+          >
+            {submitting
+              ? t(f.submitting, locale)
+              : t(f.submitBtn, locale).replace("{count}", String(files.length))}
+          </Button>
+
+          <p className="text-center text-xs text-muted-foreground">
+            {t(f.privacy, locale)}
           </p>
-          {totalCandidates > 1 && (
-            <p className="text-center text-sm text-muted-foreground">
-              Candidate {Math.min(candidateIdx + 1, totalCandidates)} of {totalCandidates}
-            </p>
-          )}
-        </CardContent>
-      </Card>
+        </form>
+      </div>
     );
   }
 
-  // Error
+  // ── Processing ──
+  if (isProcessing && !isComplete) {
+    return (
+      <CompanyProgressView
+        status={status}
+        pollError={pollError}
+        onReset={handleReset}
+        roleName={roleName}
+        jobDescription={jobDescription}
+        files={files}
+        stepDescriptions={stepDescriptions}
+      />
+    );
+  }
+
+  // ── Error ──
   if (isError) {
     return (
-      <Card className="mx-auto max-w-2xl">
-        <CardContent className="py-10 text-center">
-          <p className="text-lg font-medium text-destructive">Screening Failed</p>
-          <p className="mt-2 text-muted-foreground">{pollError || status?.error || "An unknown error occurred"}</p>
-          <Button onClick={handleReset} className="mt-6">Try Again</Button>
-        </CardContent>
-      </Card>
+      <div className="cekcv-glass mx-auto max-w-2xl rounded-2xl p-6 sm:p-8">
+        <div className="py-6 text-center">
+          <p className="text-lg font-medium text-destructive">{t(f.errorTitle, locale)}</p>
+          <p className="mt-2 text-muted-foreground">
+            {pollError || status?.error || t(f.errorUnknown, locale)}
+          </p>
+          <Button onClick={handleReset} className="mt-6 cekcv-gradient text-white hover:opacity-90">
+            {t(f.tryAgain, locale)}
+          </Button>
+        </div>
+      </div>
     );
   }
 
-  // Results — candidate ranking
-  return <BatchResults result={result!} onReset={handleReset} />;
+  // ── Results ──
+  return (
+    <CompanyDashboard
+      result={result!}
+      onReset={handleReset}
+      roleName={roleName}
+      batchId={status?.batchId || undefined}
+    />
+  );
 }
 
-function BatchResults({
-  result,
-  onReset,
-}: {
-  result: Record<string, unknown>;
+// Translated step descriptions for company progress
+function getCompanyStepDescription(
+  step: string,
+  totalCandidates: number,
+  locale: "en" | "id",
+  f: typeof translations.companyForm
+): string {
+  switch (step) {
+    case "started":
+      return t(f.progressBatch, locale).replace("{count}", String(totalCandidates));
+    case "analyzing":
+      return t(f.progressAnalyzing, locale);
+    case "scoring":
+      return t(f.progressScoring, locale);
+    case "ranking":
+      return t(f.progressRanking, locale);
+    default:
+      return t(f.progressBatch, locale).replace("{count}", String(totalCandidates));
+  }
+}
+
+// ── Company Progress View (matches individual design) ──
+
+interface CompanyProgressProps {
+  status: {
+    step?: string;
+    progress?: number;
+    stepDescription?: string;
+    status?: string;
+    error?: string | null;
+    candidateIndex?: number;
+    totalCandidates?: number;
+  } | null;
+  pollError: string | null;
   onReset: () => void;
-}) {
-  const candidates = (result.candidates || result.ranked_candidates || []) as Candidate[];
-  const sorted = [...candidates].sort((a, b) => (b.score || 0) - (a.score || 0));
+  roleName: string;
+  jobDescription: string;
+  files: File[];
+  stepDescriptions: Record<string, string>;
+}
+
+function CompanyProgressView({
+  status,
+  pollError,
+  onReset,
+  roleName,
+  jobDescription,
+  files,
+  stepDescriptions,
+}: CompanyProgressProps) {
+  const { locale } = useLanguage();
+  const f = translations.companyForm;
+  const p = translations.progress;
+
+  const rawStep = status?.step || "started";
+  const progress = status?.progress || 0;
+  const currentStep = normalizeStep(rawStep, progress);
+  const candidateIdx = status?.candidateIndex || 0;
+  const totalCandidates = status?.totalCandidates || files.length;
+  const stepOrder = Object.keys(COMPANY_STEPS);
+  const currentIdx = stepOrder.indexOf(currentStep);
+
+  // Timer
+  const [startTime] = useState(() => Date.now());
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setElapsed(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [startTime]);
+
+  // Estimate based on number of candidates (~45s per candidate)
+  const estimatedDuration = Math.max(60, totalCandidates * 45);
+  const remaining = Math.max(0, estimatedDuration - elapsed);
+
+  let timeDisplay: string;
+  if (progress >= 90) {
+    timeDisplay = t(p.almostDone, locale);
+  } else if (remaining <= 30 && progress >= 50) {
+    timeDisplay = t(p.lessThan30, locale);
+  } else if (remaining === 0 && progress >= 60) {
+    timeDisplay = t(p.wrapping, locale);
+  } else if (remaining === 0) {
+    timeDisplay = t(p.stillWorking, locale);
+  } else {
+    const rounded = Math.ceil(remaining / 10) * 10;
+    timeDisplay = `~${rounded}s ${t(p.remaining, locale)}`;
+  }
+
+  // Step labels (translated)
+  const stepLabels: Record<string, { en: string; id: string }> = {
+    started:   { en: "Upload", id: "Upload" },
+    analyzing: { en: "Analyze", id: "Analisis" },
+    scoring:   { en: "Score", id: "Skor" },
+    ranking:   { en: "Rank", id: "Ranking" },
+    complete:  { en: "Done", id: "Selesai" },
+  };
+
+  const getStepLabel = (key: string) => {
+    const label = stepLabels[key];
+    return label ? label[locale] : key;
+  };
+
+  const totalSize = files.reduce((sum, f) => sum + f.size, 0);
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="cekcv-glass cekcv-glow mx-auto max-w-3xl rounded-2xl p-6 sm:p-8">
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full cekcv-gradient">
+          <Users className="h-5 w-5 text-white" />
+        </div>
         <div>
-          <h2 className="text-2xl font-bold">Screening Results</h2>
-          <p className="text-muted-foreground">
-            {sorted.length} candidate{sorted.length !== 1 ? "s" : ""} ranked by score
+          <h2 className="text-lg font-semibold">{t(f.progressTitle, locale)}</h2>
+          <p className="text-sm text-muted-foreground">
+            {files.length} CV{files.length !== 1 ? "s" : ""} ({formatFileSize(totalSize)})
           </p>
         </div>
       </div>
 
-      <Separator />
+      {/* Gradient progress bar */}
+      <div className="mt-6">
+        <div className="relative h-2.5 overflow-hidden rounded-full bg-muted/30">
+          <div
+            className="cekcv-progress-shimmer h-full rounded-full transition-all duration-700 ease-out"
+            style={{ width: `${Math.max(progress, 3)}%` }}
+          />
+        </div>
+        <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
+          <span>{progress}% {t(p.complete, locale)}</span>
+          <span>{timeDisplay}</span>
+        </div>
+      </div>
 
-      <div className="space-y-4">
-        {sorted.map((c, i) => {
-          const scoreColor =
-            c.score >= 80 ? "text-green-600" : c.score >= 60 ? "text-yellow-600" : "text-red-600";
+      {/* Horizontal stepper (desktop) */}
+      <div className="mt-8 hidden sm:block">
+        <div className="flex items-start justify-between">
+          {stepOrder.map((key, thisIdx) => {
+            const step = COMPANY_STEPS[key];
+            const Icon = step.icon;
+            const isDone = thisIdx < currentIdx;
+            const isCurrent = key === currentStep;
 
-          return (
-            <Card key={i}>
-              <CardContent className="py-4">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-3">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-sm font-medium">
-                        {i + 1}
-                      </span>
-                      <h3 className="font-semibold">{c.name || `Candidate ${i + 1}`}</h3>
-                      {c.status && (
-                        <Badge variant={c.score >= 70 ? "default" : "secondary"}>
-                          {c.status}
-                        </Badge>
-                      )}
-                    </div>
-                    {c.email && <p className="text-sm text-muted-foreground">{c.email}</p>}
-                    {c.summary && <p className="mt-2 text-sm">{c.summary}</p>}
+            return (
+              <div key={key} className="flex flex-1 flex-col items-center">
+                <div className="flex w-full items-center">
+                  {thisIdx > 0 && (
+                    <div
+                      className={`h-0.5 flex-1 transition-colors duration-500 ${
+                        isDone || isCurrent ? "cekcv-gradient" : "bg-muted/30"
+                      }`}
+                    />
+                  )}
+                  {thisIdx === 0 && <div className="flex-1" />}
+
+                  <div
+                    className={`relative flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-all duration-500 ${
+                      isDone
+                        ? "cekcv-gradient text-white"
+                        : isCurrent
+                          ? "cekcv-gradient text-white cekcv-glow"
+                          : "bg-muted/40 text-muted-foreground/50"
+                    }`}
+                    style={isCurrent ? { animation: "pulse-ring 2s ease-in-out infinite" } : undefined}
+                  >
+                    {isDone ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                   </div>
-                  <div className="text-right">
-                    <p className={`text-3xl font-bold ${scoreColor}`}>{c.score}</p>
-                    <p className="text-xs text-muted-foreground">score</p>
-                  </div>
+
+                  {thisIdx < stepOrder.length - 1 && (
+                    <div
+                      className={`h-0.5 flex-1 transition-colors duration-500 ${
+                        isDone ? "cekcv-gradient" : "bg-muted/30"
+                      }`}
+                    />
+                  )}
+                  {thisIdx === stepOrder.length - 1 && <div className="flex-1" />}
                 </div>
 
-                {(c.strengths?.length > 0 || c.gaps?.length > 0) && (
-                  <div className="mt-3 grid gap-4 sm:grid-cols-2">
-                    {c.strengths?.length > 0 && (
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Strengths</p>
-                        <ul className="mt-1 space-y-1">
-                          {c.strengths.slice(0, 3).map((s, j) => (
-                            <li key={j} className="flex gap-1.5 text-xs">
-                              <span className="text-green-600">+</span>{s}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                    {c.gaps?.length > 0 && (
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Gaps</p>
-                        <ul className="mt-1 space-y-1">
-                          {c.gaps.slice(0, 3).map((g, j) => (
-                            <li key={j} className="flex gap-1.5 text-xs">
-                              <span className="text-red-500">-</span>{g}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                <p
+                  className={`mt-2 text-xs font-medium ${
+                    isDone
+                      ? "text-foreground"
+                      : isCurrent
+                        ? "font-semibold text-foreground"
+                        : "text-muted-foreground/50"
+                  }`}
+                >
+                  {getStepLabel(key)}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Vertical stepper (mobile) */}
+      <div className="mt-6 space-y-1 sm:hidden">
+        {stepOrder.map((key, thisIdx) => {
+          const step = COMPANY_STEPS[key];
+          const Icon = step.icon;
+          const isDone = thisIdx < currentIdx;
+          const isCurrent = key === currentStep;
+
+          return (
+            <div
+              key={key}
+              className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+                isCurrent ? "bg-background/80" : ""
+              }`}
+            >
+              <div
+                className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs transition-all ${
+                  isDone
+                    ? "cekcv-gradient text-white"
+                    : isCurrent
+                      ? "cekcv-gradient text-white"
+                      : "bg-muted/40 text-muted-foreground/50"
+                }`}
+                style={isCurrent ? { animation: "pulse-ring 2s ease-in-out infinite" } : undefined}
+              >
+                {isDone ? <Check className="h-3.5 w-3.5" /> : <Icon className="h-3.5 w-3.5" />}
+              </div>
+              <span
+                className={`text-sm ${
+                  isDone
+                    ? "text-muted-foreground"
+                    : isCurrent
+                      ? "font-semibold text-foreground"
+                      : "text-muted-foreground/50"
+                }`}
+              >
+                {getStepLabel(key)}
+                {isCurrent && <span className="ml-1 inline-block animate-pulse">...</span>}
+              </span>
+            </div>
           );
         })}
       </div>
 
-      {sorted.length === 0 && (
-        <Card>
-          <CardContent className="py-10 text-center text-muted-foreground">
-            No candidate results available. The batch may still be processing.
-          </CardContent>
-        </Card>
+      {/* Active step detail */}
+      {currentStep !== "complete" && (
+        <div className="mt-6 rounded-xl border bg-background/80 p-4 animate-in fade-in-0 slide-in-from-bottom-2">
+          <p className="text-sm font-medium">{status?.stepDescription || getCompanyStepDescription(currentStep, totalCandidates, locale, f)}</p>
+        </div>
       )}
 
-      <div className="flex justify-center pt-4">
-        <Button variant="outline" onClick={onReset}>Screen More Candidates</Button>
+      {/* Candidate progress */}
+      {totalCandidates > 1 && (
+        <div className="mt-4 rounded-xl border bg-background/80 p-4">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-medium">
+              {t(f.progressCandidate, locale)
+                .replace("{current}", String(Math.min(candidateIdx + 1, totalCandidates)))
+                .replace("{total}", String(totalCandidates))}
+            </p>
+            <span className="text-xs text-muted-foreground">
+              {Math.round(((candidateIdx) / totalCandidates) * 100)}%
+            </span>
+          </div>
+          <div className="mt-2 flex gap-1">
+            {Array.from({ length: totalCandidates }).map((_, i) => (
+              <div
+                key={i}
+                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                  i < candidateIdx
+                    ? "cekcv-gradient"
+                    : i === candidateIdx
+                      ? "cekcv-progress-shimmer"
+                      : "bg-muted/30"
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CV files + JD context panels */}
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="rounded-xl border bg-background/60 p-4">
+          <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <FileText className="h-3.5 w-3.5" />
+            {locale === "en" ? "Candidate CVs" : "CV Kandidat"}
+          </h3>
+          <ul className="mt-2 space-y-1">
+            {files.slice(0, 5).map((file, i) => (
+              <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full cekcv-gradient" />
+                <span className="truncate">{file.name}</span>
+              </li>
+            ))}
+            {files.length > 5 && (
+              <li className="text-xs text-muted-foreground/50">
+                +{files.length - 5} more
+              </li>
+            )}
+          </ul>
+        </div>
+
+        <div className="rounded-xl border bg-background/60 p-4">
+          <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+            <Target className="h-3.5 w-3.5" />
+            {locale === "en" ? "Target Role" : "Target Posisi"}
+          </h3>
+          <p className="mt-2 text-sm font-medium">{roleName || "—"}</p>
+          <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
+            {jobDescription.slice(0, 200)}
+            {jobDescription.length > 200 && "..."}
+          </p>
+        </div>
+      </div>
+
+      {/* Error display */}
+      {pollError && (
+        <div className="mt-4 rounded-lg border border-destructive/50 bg-destructive/10 p-3">
+          <p className="text-sm font-medium text-destructive">{t(p.connectionIssue, locale)}</p>
+          <p className="text-xs text-destructive/80">{pollError}</p>
+        </div>
+      )}
+
+      {/* Rotating tips */}
+      <div className="mt-6">
+        <RotatingTips />
+      </div>
+
+      <div className="mt-4 flex justify-center">
+        <Button variant="ghost" size="sm" onClick={onReset} className="text-muted-foreground">
+          {t(f.cancel, locale)}
+        </Button>
       </div>
     </div>
   );
 }
+

@@ -86,16 +86,14 @@ export interface JobSearchResponse {
 }
 
 export async function searchJobs(
-  role: string,
-  location: string,
-  limit: number = 10
+  jobId: string
 ): Promise<JobSearchResponse> {
   const res = await fetch(
     `${N8N_BASE_URL}/webhook/cekcv-search-jobs`,
     {
       method: "POST",
       headers: { ...N8N_HEADERS, "Content-Type": "application/json" },
-      body: JSON.stringify({ role, location, limit }),
+      body: JSON.stringify({ jobId }),
     }
   );
   const data = await parseJsonResponse<JobSearchResponse | JobSearchResponse[]>(res);

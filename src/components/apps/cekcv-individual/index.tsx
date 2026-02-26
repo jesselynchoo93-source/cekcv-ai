@@ -13,6 +13,7 @@ import { ResultsErrorBoundary } from "./error-boundary";
 import { ProgressView } from "./progress-view";
 import { ResultsView } from "./results-view";
 import { parseResult, formatFileSize } from "./utils";
+import type { CekCVResult } from "./types";
 
 export function CekCVIndividual() {
   const [file, setFile] = useState<File | null>(null);
@@ -21,13 +22,14 @@ export function CekCVIndividual() {
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const completedResultRef = useRef<CekCVResult | null>(null);
   const { jobId, status, polling, pollError, stepDescriptions, start, reset } = useJobPolling();
   const { locale } = useLanguage();
   const f = translations.form;
   const r = translations.results;
 
   const handleFile = useCallback((incoming: File | null) => {
-    if (incoming && !incoming.name.match(/\.(pdf|docx?|doc)$/i)) {
+    if (incoming && !incoming.name.match(/\.pdf$/i)) {
       setError(t(f.uploadError, locale));
       return;
     }
@@ -79,6 +81,7 @@ export function CekCVIndividual() {
 
   const handleReset = () => {
     reset();
+    completedResultRef.current = null;
     setFile(null);
     setJobDescription("");
     setError(null);
@@ -87,12 +90,18 @@ export function CekCVIndividual() {
   };
 
   const result = status?.result as Record<string, unknown> | null;
-  const isComplete = status?.status === "complete" && result;
   const isError = status?.status === "error" || !!pollError;
   const isProcessing = polling || (status?.status === "processing" && !pollError);
 
-  // Show form when no job is running
-  if (!isProcessing && !isComplete && !isError) {
+  // Capture result in ref once complete — survives any future state changes
+  if (status?.status === "complete" && result && !completedResultRef.current) {
+    completedResultRef.current = parseResult(result);
+  }
+
+  const hasCompletedResult = !!completedResultRef.current;
+
+  // Show form when no job is running and no saved result
+  if (!isProcessing && !hasCompletedResult && !isError) {
     return (
       <div className="cekcv-glass cekcv-glow mx-auto max-w-2xl rounded-2xl p-6 sm:p-8">
         <h2 className="text-xl font-bold">{t(f.title, locale)}</h2>
@@ -132,7 +141,7 @@ export function CekCVIndividual() {
                   ref={fileRef}
                   id="cv-file"
                   type="file"
-                  accept=".pdf,.docx,.doc"
+                  accept=".pdf"
                   className="hidden"
                   onChange={(e) => handleFile(e.target.files?.[0] ?? null)}
                 />
@@ -169,6 +178,31 @@ export function CekCVIndividual() {
               value={jobDescription}
               onChange={(e) => setJobDescription(e.target.value)}
             />
+
+            <div className="flex items-center gap-3 py-1">
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-xs font-medium text-muted-foreground">{t(f.jdOrLabel, locale)}</span>
+              <div className="h-px flex-1 bg-border" />
+            </div>
+
+            <div className="flex items-center gap-2 rounded-lg border px-3 py-2">
+              <svg className="h-4 w-4 shrink-0 text-[#0A66C2]" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              <input
+                type="url"
+                placeholder={t(f.jdLinkedinPlaceholder, locale)}
+                className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60"
+                value={jobDescription.startsWith("http") ? jobDescription : ""}
+                onChange={(e) => setJobDescription(e.target.value)}
+                onFocus={(e) => {
+                  if (jobDescription && !jobDescription.startsWith("http")) {
+                    e.target.value = "";
+                  }
+                }}
+              />
+            </div>
+            <p className="text-xs text-muted-foreground/60">{t(f.jdLinkedinExample, locale)}</p>
           </div>
 
           {error && <p className="text-sm text-destructive">{error}</p>}
@@ -191,7 +225,7 @@ export function CekCVIndividual() {
   }
 
   // Show progress while processing
-  if (isProcessing && !isComplete) {
+  if (isProcessing && !hasCompletedResult) {
     return (
       <ProgressView
         status={status}
@@ -205,8 +239,8 @@ export function CekCVIndividual() {
     );
   }
 
-  // Error state
-  if (isError) {
+  // Error state (only if we don't already have a completed result)
+  if (isError && !hasCompletedResult) {
     return (
       <Card className="mx-auto max-w-2xl">
         <CardContent className="py-10 text-center">
@@ -222,8 +256,8 @@ export function CekCVIndividual() {
     );
   }
 
-  // Results display
-  const parsed = parseResult(result!);
+  // Results display — use persisted ref
+  const parsed = completedResultRef.current ?? parseResult(result!);
 
   return (
     <ResultsErrorBoundary onReset={handleReset}>

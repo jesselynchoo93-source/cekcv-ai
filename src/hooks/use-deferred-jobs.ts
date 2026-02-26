@@ -17,7 +17,7 @@ export function useDeferredJobs() {
       const res = await fetch("/api/cekcv/search-jobs", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ role, location: location || "Indonesia", limit: 10 }),
+        body: JSON.stringify({ role, location: location || "Indonesia", limit: 20 }),
       });
 
       const data = await res.json();

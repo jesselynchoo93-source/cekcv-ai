@@ -7,6 +7,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Check, ChevronDown, Lightbulb } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
+import { translations, t } from "@/lib/translations";
 import { useChecklist } from "@/hooks/use-checklist";
 import { PriorityCard } from "../ui/priority-card";
 import { KeywordBadge } from "../ui/keyword-badge";
@@ -26,67 +28,11 @@ function getPriority(index: number): "high" | "medium" | "low" {
   return "low";
 }
 
-/**
- * Extract a short action-word title (2-4 words) from a suggestion.
- * Pattern: "Verb + Object" — scannable at a glance.
- */
-function generateShortTitle(text: string): string {
-  const words = text.split(/\s+/);
-
-  // Common action verbs that start suggestions
-  const actionVerbs = new Set([
-    "add", "include", "expand", "pursue", "create", "remove", "update",
-    "rewrite", "replace", "highlight", "emphasize", "quantify", "list",
-    "mention", "strengthen", "optimize", "tailor", "use", "move",
-    "reorganize", "consolidate", "shorten", "lengthen", "improve",
-    "specify", "align", "target", "develop", "obtain", "complete",
-    "restructure", "simplify", "clarify", "demonstrate", "showcase",
-    "incorporate", "integrate", "reduce", "increase", "boost", "fix",
-  ]);
-
-  // Try to extract a quoted term like 'Skills' or "Project Management"
-  const quotedMatch = text.match(/['"]([^'"]{3,30})['"]/);
-  const startsWithVerb = actionVerbs.has(words[0]?.toLowerCase());
-
-  // Best case: "Verb + 'Quoted Section'"
-  if (quotedMatch && startsWithVerb) {
-    return `${words[0]} ${quotedMatch[1]}`;
-  }
-
-  // If starts with verb, take verb + next 1-3 key words (skip articles/prepositions)
-  if (startsWithVerb) {
-    const skip = new Set(["a", "an", "the", "your", "to", "for", "of", "in", "on", "with", "more", "and"]);
-    const keyWords = [words[0]];
-    for (let i = 1; i < words.length && keyWords.length < 4; i++) {
-      const w = words[i].toLowerCase().replace(/[^a-z]/g, "");
-      if (!skip.has(w) && w.length > 1) keyWords.push(words[i].replace(/[,:;.]+$/, ""));
-    }
-    return keyWords.join(" ");
-  }
-
-  // If has a quoted term, use it
-  if (quotedMatch) {
-    return quotedMatch[1];
-  }
-
-  // Fallback: first 3-4 meaningful words
-  const skip = new Set(["a", "an", "the", "your", "to", "for", "of", "in", "on", "with", "and"]);
-  const keyWords: string[] = [];
-  for (const word of words) {
-    const w = word.toLowerCase().replace(/[^a-z]/g, "");
-    if (!skip.has(w) && w.length > 1) keyWords.push(word.replace(/[,:;.]+$/, ""));
-    if (keyWords.length >= 3) break;
-  }
-  return keyWords.join(" ") || words.slice(0, 3).join(" ");
-}
-
 export function ImprovementsTab({ result, role, jobDescription, jobId }: ImprovementsTabProps) {
   const { improvements, score_projection } = result;
-  const allActions = [
-    ...improvements.top_3_priority_actions,
-    ...improvements.suggestions,
-  ];
-  const totalItems = allActions.length;
+  const { locale } = useLanguage();
+  const r = translations.results;
+  const totalItems = improvements.top_3_priority_actions.length + improvements.suggestions.length;
 
   const { checkedItems, toggleItem, checkedCount, progress } = useChecklist(
     totalItems,
@@ -104,8 +50,8 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
     <div className="space-y-6">
       {/* Header */}
       <p className="text-muted-foreground">
-        How to improve your CV for{" "}
-        <span className="font-semibold text-foreground">{role || "this role"}</span>
+        {t(r.howToImprove, locale)}{" "}
+        <span className="font-semibold text-foreground">{role || t(r.thisRole, locale)}</span>
       </p>
 
       {/* Progress tracker with gradient bar */}
@@ -115,7 +61,7 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
             <div className="min-w-0 flex-1 space-y-1.5">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">
-                  {checkedCount}/{totalItems} applied
+                  {checkedCount}/{totalItems} {t(r.applied, locale)}
                 </span>
                 <span className="font-medium">{progress}%</span>
               </div>
@@ -130,7 +76,7 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
               <p className="text-2xl font-bold tabular-nums cekcv-gradient-text">
                 {estimatedScore}
               </p>
-              <p className="text-[10px] text-muted-foreground">est. score</p>
+              <p className="text-[10px] text-muted-foreground">{t(r.estScore, locale)}</p>
             </div>
           </div>
         </div>
@@ -139,7 +85,7 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
       {/* Top Priority Actions */}
       {improvements.top_3_priority_actions.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold">Highest impact changes</h3>
+          <h3 className="text-sm font-semibold">{t(r.highestImpact, locale)}</h3>
           {improvements.top_3_priority_actions.map((action, i) => (
             <PriorityCard
               key={i}
@@ -156,7 +102,7 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
       {improvements.missing_keywords.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Missing Keywords</CardTitle>
+            <CardTitle className="text-base">{t(r.missingKeywords, locale)}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap gap-2">
@@ -171,17 +117,16 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
       {/* Additional Suggestions — left-right layout */}
       {improvements.suggestions.length > 0 && (
         <div className="space-y-3">
-          <h3 className="text-sm font-semibold">Additional Suggestions</h3>
+          <h3 className="text-sm font-semibold">{t(r.additionalSuggestions, locale)}</h3>
           <div className="space-y-2">
             {improvements.suggestions.map((suggestion, i) => {
               const checklistIdx = improvements.top_3_priority_actions.length + i;
               const isChecked = checkedItems.has(checklistIdx);
-              const title = generateShortTitle(suggestion);
 
               return (
                 <div
                   key={i}
-                  className="grid gap-3 rounded-lg border p-3 sm:grid-cols-[180px_1fr] items-start"
+                  className="grid gap-3 rounded-lg border p-3 sm:grid-cols-[180px_1fr] items-center"
                 >
                   <div className="flex items-center gap-2">
                     <button
@@ -200,10 +145,10 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
                         isChecked ? "line-through text-muted-foreground" : ""
                       }`}
                     >
-                      {title}
+                      {suggestion.title}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{suggestion}</p>
+                  <p className="text-sm text-muted-foreground">{suggestion.text}</p>
                 </div>
               );
             })}
@@ -216,7 +161,7 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
         <Collapsible>
           <CollapsibleTrigger className="flex w-full items-center gap-2 rounded-lg border px-4 py-3 text-sm font-semibold transition-colors hover:bg-muted/50">
             <Lightbulb className="h-4 w-4 text-yellow-500" />
-            ATS Formatting Tips ({improvements.ats_formatting_tips.length})
+            {t(r.atsFormattingTips, locale)} ({improvements.ats_formatting_tips.length})
             <ChevronDown className="ml-auto h-4 w-4 text-muted-foreground transition-transform [[data-state=open]>&]:rotate-180" />
           </CollapsibleTrigger>
           <CollapsibleContent className="mt-2 space-y-2">

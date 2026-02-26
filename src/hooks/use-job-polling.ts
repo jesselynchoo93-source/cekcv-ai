@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { StatusResponse } from "@/lib/n8n";
 
-const POLL_INTERVAL = 3000;
+const POLL_INTERVAL = 5000;
+const FETCH_TIMEOUT = 15000; // Abort slow polls after 15s so they don't block subsequent polls
 const MAX_ERRORS = 5;
+const MAX_POLL_DURATION = 10 * 60 * 1000; // 10 minutes
 
 export function useJobPolling() {
   const [jobId, setJobId] = useState<string | null>(null);
@@ -14,6 +16,7 @@ export function useJobPolling() {
   const [stepDescriptions, setStepDescriptions] = useState<Record<string, string>>({});
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const maxDurationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const errorCountRef = useRef(0);
   const stoppedRef = useRef(false);
   const pollingRef = useRef(false);
@@ -29,6 +32,10 @@ export function useJobPolling() {
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    if (maxDurationRef.current) {
+      clearTimeout(maxDurationRef.current);
+      maxDurationRef.current = null;
+    }
     setPolling(false);
   }, []);
 
@@ -38,7 +45,13 @@ export function useJobPolling() {
     pollingRef.current = true;
 
     try {
-      const res = await fetch(`/api/cekcv/status?jobId=${encodeURIComponent(id)}`);
+      const controller = new AbortController();
+      const fetchTimer = setTimeout(() => controller.abort(), FETCH_TIMEOUT);
+
+      const res = await fetch(`/api/cekcv/status?jobId=${encodeURIComponent(id)}`, {
+        signal: controller.signal,
+      });
+      clearTimeout(fetchTimer);
 
       // Check again after await — could have been stopped while waiting
       if (stoppedRef.current) return;
@@ -72,6 +85,8 @@ export function useJobPolling() {
       }
     } catch (err) {
       if (stoppedRef.current) return;
+      // Aborted fetches (timeout) are not real errors — just skip and retry next interval
+      if (err instanceof DOMException && err.name === "AbortError") return;
       errorCountRef.current++;
       if (errorCountRef.current >= MAX_ERRORS) {
         stop();
@@ -95,6 +110,11 @@ export function useJobPolling() {
       // Small delay before first poll to let Init Job Status write the row
       timeoutRef.current = setTimeout(() => poll(id), 1000);
       intervalRef.current = setInterval(() => poll(id), POLL_INTERVAL);
+      // Safety timeout: stop polling after MAX_POLL_DURATION
+      maxDurationRef.current = setTimeout(() => {
+        stop();
+        setPollError("Analysis timed out. Please try again.");
+      }, MAX_POLL_DURATION);
     },
     [poll, stop]
   );

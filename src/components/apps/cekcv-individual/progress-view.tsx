@@ -73,22 +73,9 @@ export function ProgressView({
     return () => clearInterval(interval);
   }, [startTime]);
 
-  // Smart time estimate: 180s base countdown, progress-based when we have data
-  const FIXED_DURATION = 180; // 3 minutes base countdown
-  const fixedRemaining = Math.max(0, FIXED_DURATION - elapsed);
-
-  let remaining: number;
-  if (progress >= 85) {
-    // Almost done — trust the progress
-    remaining = Math.max(0, Math.round((elapsed / progress) * (100 - progress)));
-  } else if (progress >= 15) {
-    // Enough data to estimate — use progress-based but cap at fixed
-    const progressBased = Math.round((elapsed / progress) * (100 - progress));
-    remaining = Math.min(progressBased, fixedRemaining);
-  } else {
-    // Too early — use fixed countdown
-    remaining = fixedRemaining;
-  }
+  // Always count down from 180s so the timer never jumps around
+  const FIXED_DURATION = 180;
+  const remaining = Math.max(0, FIXED_DURATION - elapsed);
 
   let timeDisplay: string;
   if (progress >= 90) {
@@ -275,30 +262,25 @@ export function ProgressView({
       {currentStep !== "complete" && getActiveDescription(currentStep) && (
         <div className="mt-6 rounded-xl border bg-background/80 p-4 animate-in fade-in-0 slide-in-from-bottom-2">
           <p className="text-sm font-medium">
-            {stepDescriptions[currentStep] || getActiveDescription(currentStep)}
+            {getActiveDescription(currentStep) || stepDescriptions[currentStep]}
           </p>
         </div>
       )}
 
       {/* CV + JD context panels */}
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border bg-background/60 p-4">
+        <div className="min-w-0 rounded-xl border bg-background/60 p-4">
           <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <FileText className="h-3.5 w-3.5" />
+            <FileText className="h-3.5 w-3.5 shrink-0" />
             {t(p.yourCV, locale)}
           </h3>
-          <p className="mt-2 text-sm font-medium">{fileName}</p>
+          <p className="mt-2 truncate text-sm font-medium">{fileName}</p>
           <p className="text-xs text-muted-foreground">{formatFileSize(fileSize)}</p>
-          {currentIdx >= 1 && stepDescriptions.analyzing && (
-            <p className="mt-2 rounded bg-muted/30 p-2 text-xs text-muted-foreground animate-in fade-in-0">
-              {stepDescriptions.analyzing}
-            </p>
-          )}
         </div>
 
-        <div className="rounded-xl border bg-background/60 p-4">
+        <div className="min-w-0 rounded-xl border bg-background/60 p-4">
           <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <Target className="h-3.5 w-3.5" />
+            <Target className="h-3.5 w-3.5 shrink-0" />
             {t(p.targetJob, locale)}
           </h3>
           {jdRequirements.length > 0 ? (
@@ -311,12 +293,12 @@ export function ProgressView({
               ))}
               {jdRequirements.length > 4 && (
                 <li className="text-xs text-muted-foreground/50">
-                  +{jdRequirements.length - 4} more
+                  +{jdRequirements.length - 4} {t(p.nMore, locale)}
                 </li>
               )}
             </ul>
           ) : (
-            <p className="mt-2 text-xs text-muted-foreground line-clamp-4">
+            <p className="mt-2 break-all text-xs text-muted-foreground line-clamp-4">
               {jobDescription.slice(0, 200)}
               {jobDescription.length > 200 && "..."}
             </p>

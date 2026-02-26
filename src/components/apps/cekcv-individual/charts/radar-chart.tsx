@@ -6,6 +6,7 @@ import {
   PolarAngleAxis,
   Radar,
   ResponsiveContainer,
+  Tooltip,
 } from "recharts";
 import type { ScoreCategory } from "../types";
 
@@ -63,12 +64,29 @@ function WrappedTick({
   );
 }
 
+/** Custom tooltip for radar chart hover */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function RadarTooltip({ active, payload }: any) {
+  if (!active || !payload?.length) return null;
+  const d = payload[0].payload;
+  return (
+    <div className="rounded-lg border bg-popover px-3 py-2 text-popover-foreground shadow-md">
+      <p className="text-xs font-semibold">{d.category}</p>
+      <p className="mt-0.5 text-xs">
+        Score: {d.weighted_current}/{d.weighted_max} ({d.score}%)
+      </p>
+    </div>
+  );
+}
+
 export function RadarChart({ data }: RadarChartProps) {
   const chartData = data.map((item) => ({
     category: item.category,
     score: item.weighted_max > 0
       ? Math.round((item.weighted_current / item.weighted_max) * 100)
       : item.score,
+    weighted_current: item.weighted_current,
+    weighted_max: item.weighted_max,
     fullMark: 100,
   }));
 
@@ -90,6 +108,7 @@ export function RadarChart({ data }: RadarChartProps) {
           fillOpacity={0.15}
           strokeWidth={2}
         />
+        <Tooltip content={<RadarTooltip />} />
       </RechartsRadarChart>
     </ResponsiveContainer>
   );

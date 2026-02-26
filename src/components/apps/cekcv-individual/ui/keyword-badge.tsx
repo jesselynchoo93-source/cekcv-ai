@@ -32,7 +32,7 @@ export function KeywordBadge({ keyword, jobDescription }: KeywordBadgeProps) {
 
   if (!context) {
     return (
-      <Badge variant="destructive" className="cursor-default">
+      <Badge variant="outline" className="cursor-default border-amber-300 bg-amber-50 text-amber-700 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
         {keyword}
       </Badge>
     );
@@ -46,7 +46,7 @@ export function KeywordBadge({ keyword, jobDescription }: KeywordBadgeProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <Badge variant="destructive" className="cursor-pointer">
+        <Badge variant="outline" className="cursor-pointer border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 dark:border-amber-700 dark:bg-amber-950/30 dark:text-amber-400">
           {keyword}
         </Badge>
       </TooltipTrigger>

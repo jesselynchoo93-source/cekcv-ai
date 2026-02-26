@@ -1,5 +1,7 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
+import { Suspense } from "react";
 import Link from "next/link";
 import { CekCVCompany } from "@/components/apps/cekcv-company";
 import { ThemeToggle } from "@/components/apps/cekcv-individual/ui/theme-toggle";
@@ -8,8 +10,10 @@ import { CekCVLogo } from "@/components/ui/logo";
 import { useLanguage } from "@/contexts/language-context";
 import { translations, t } from "@/lib/translations";
 
-export default function CompanyPage() {
+function CompanyPageInner() {
   const { locale } = useLanguage();
+  const searchParams = useSearchParams();
+  const batchId = searchParams.get("batch") || undefined;
 
   return (
     <div className="min-h-screen bg-background">
@@ -33,8 +37,16 @@ export default function CompanyPage() {
       </header>
 
       <main className="mx-auto max-w-5xl px-6 py-10">
-        <CekCVCompany />
+        <CekCVCompany initialBatchId={batchId} />
       </main>
     </div>
+  );
+}
+
+export default function CompanyPage() {
+  return (
+    <Suspense>
+      <CompanyPageInner />
+    </Suspense>
   );
 }

@@ -16,7 +16,7 @@ import {
   Brain,
   Target,
   TrendingUp,
-  Search,
+  Briefcase,
   CheckCircle2,
   FileEdit,
   Star,
@@ -73,7 +73,7 @@ export default function Dashboard() {
         { icon: Target, title: t(l.feat1Title, locale), desc: t(l.feat1Desc, locale) },
         { icon: TrendingUp, title: t(l.feat2Title, locale), desc: t(l.feat2Desc, locale) },
         { icon: FileEdit, title: t(l.feat3Title, locale), desc: t(l.feat3Desc, locale) },
-        { icon: Search, title: t(l.feat4Title, locale), desc: t(l.feat4Desc, locale) },
+        { icon: Briefcase, title: t(l.feat4Title, locale), desc: t(l.feat4Desc, locale) },
       ]
     : [
         { icon: FilePlus2, title: t(l.companyFeat1Title, locale), desc: t(l.companyFeat1Desc, locale) },
@@ -148,11 +148,10 @@ export default function Dashboard() {
       </div>
 
       {/* Hero */}
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-br from-green-50 via-background to-teal-50 dark:from-green-950/20 dark:via-background dark:to-teal-950/20" />
-
-        <div className="mx-auto max-w-5xl px-6 py-16 sm:py-24">
+      <section className="cekcv-hero-bg overflow-hidden">
+        <div className="relative z-10 mx-auto max-w-5xl px-6 py-16 sm:py-24">
           <div className="mx-auto max-w-2xl text-center">
+
             <Badge variant="outline" className="mb-4">
               {t(l.badge, locale)}
             </Badge>
@@ -161,7 +160,7 @@ export default function Dashboard() {
               <span className="cekcv-gradient-text">{highlight}</span>{" "}
               {headlineEnd}
             </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
+            <p className="mt-4 text-lg text-muted-foreground sm:text-xl">
               {subtitle}
             </p>
             <div className="mt-8 flex justify-center">
@@ -174,7 +173,7 @@ export default function Dashboard() {
                 {isIndividual ? t(l.ctaAnalyze, locale) : t(l.ctaScreen, locale)}
               </Button>
             </div>
-            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-xs text-muted-foreground">
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-4 text-sm text-muted-foreground">
               {trustItems.map((item, i) => (
                 <span key={i} className="flex items-center gap-1">
                   <item.icon className="h-3.5 w-3.5" />
@@ -189,8 +188,8 @@ export default function Dashboard() {
       {/* How it works */}
       <section className="border-t bg-muted/20">
         <div className="mx-auto max-w-5xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold">{t(l.howTitle, locale)}</h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">{t(l.howTitle, locale)}</h2>
+          <p className="mt-2 text-center text-base text-muted-foreground">
             {t(l.howSubtitle, locale)}
           </p>
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
@@ -199,11 +198,10 @@ export default function Dashboard() {
                 <div className="flex h-14 w-14 items-center justify-center rounded-2xl cekcv-gradient text-white">
                   <step.icon className="h-6 w-6" />
                 </div>
-                <div className="mt-1 flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">
-                  {i + 1}
-                </div>
-                <h3 className="mt-2 font-semibold">{step.title}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{step.desc}</p>
+                <h3 className="mt-3 text-lg font-semibold">
+                  <span className="text-muted-foreground">{i + 1}.</span> {step.title}
+                </h3>
+                <p className="mt-1 text-muted-foreground">{step.desc}</p>
               </div>
             ))}
           </div>
@@ -213,8 +211,8 @@ export default function Dashboard() {
       {/* Features */}
       <section className="border-t">
         <div className="mx-auto max-w-5xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold">{t(l.featTitle, locale)}</h2>
-          <p className="mt-2 text-center text-sm text-muted-foreground">
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">{t(l.featTitle, locale)}</h2>
+          <p className="mt-2 text-center text-base text-muted-foreground">
             {t(l.featSubtitle, locale)}
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
@@ -228,8 +226,8 @@ export default function Dashboard() {
                     <feat.icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">{feat.title}</h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{feat.desc}</p>
+                    <h3 className="text-lg font-semibold">{feat.title}</h3>
+                    <p className="mt-1 text-muted-foreground">{feat.desc}</p>
                   </div>
                 </div>
               </div>
@@ -241,13 +239,13 @@ export default function Dashboard() {
       {/* Trust & Testimonials */}
       <section className="border-t bg-muted/20">
         <div className="mx-auto max-w-5xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold">
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">
             {isIndividual ? t(l.trustTitle, locale) : t(l.companyTrustTitle, locale)}
           </h2>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10">
             <div className="text-center">
-              <p className="text-2xl font-bold cekcv-gradient-text">
+              <p className="text-3xl font-bold cekcv-gradient-text">
                 {isIndividual ? t(l.trustUsersCount, locale) : t(l.companyTrustUsersCount, locale)}
               </p>
             </div>
@@ -292,13 +290,13 @@ export default function Dashboard() {
       </section>
 
       {/* Get Started — only show the card for the active mode */}
-      <section className="border-t" ref={getStartedRef}>
+      <section className="border-t bg-gradient-to-b from-green-50/40 to-background dark:from-green-950/10 dark:to-background" ref={getStartedRef}>
         <div className="mx-auto max-w-3xl px-6 py-16">
-          <h2 className="text-center text-xl font-semibold">{t(l.getStarted, locale)}</h2>
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">{t(l.getStarted, locale)}</h2>
           <div className="mt-8">
             {isIndividual ? (
               <Link href="/apps/cekcv-individual">
-                <div className="cekcv-glass group rounded-2xl p-6 transition-all hover:cekcv-glow ring-2 ring-green-500/50">
+                <div className="group rounded-2xl border-2 border-green-500/30 bg-gradient-to-br from-green-50/80 to-teal-50/50 p-6 transition-all hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 dark:from-green-950/30 dark:to-teal-950/20 dark:hover:shadow-green-500/5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
@@ -323,7 +321,7 @@ export default function Dashboard() {
               </Link>
             ) : (
               <Link href="/apps/cekcv-company">
-                <div className="cekcv-glass group rounded-2xl p-6 transition-all hover:cekcv-glow ring-2 ring-green-500/50">
+                <div className="group rounded-2xl border-2 border-green-500/30 bg-gradient-to-br from-green-50/80 to-teal-50/50 p-6 transition-all hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 dark:from-green-950/30 dark:to-teal-950/20 dark:hover:shadow-green-500/5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
@@ -352,26 +350,17 @@ export default function Dashboard() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6">
-          <div className="flex items-center gap-2">
-            <CekCVLogo size="sm" />
-            <div>
-              <p className="text-sm font-medium">CekCV.Ai</p>
-              <p className="text-xs text-muted-foreground">
-                {t(l.footerTagline, locale)}
-              </p>
-            </div>
-          </div>
-          <details className="text-right">
-            <summary className="cursor-pointer text-[11px] text-muted-foreground/40 hover:text-muted-foreground/60 transition-colors">
-              Disclaimer
-            </summary>
-            <p className="mt-2 max-w-sm text-[11px] leading-relaxed text-muted-foreground/40">
-              {t(l.disclaimer, locale)}
-            </p>
-          </details>
+      <footer className="border-t py-8 text-center">
+        <div className="flex items-center justify-center gap-2">
+          <CekCVLogo size="sm" />
+          <p className="text-sm font-medium">CekCV.Ai</p>
         </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {t(l.footerTagline, locale)}
+        </p>
+        <p className="mx-auto mt-4 max-w-xl text-[11px] leading-relaxed text-muted-foreground/50">
+          {t(l.disclaimer, locale)}
+        </p>
       </footer>
     </div>
   );

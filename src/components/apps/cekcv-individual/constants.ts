@@ -4,7 +4,6 @@ export const STEPS: Record<string, { label: string; activeDescription: string; i
   scoring_complete: { label: "Score",   activeDescription: "Calculating match against job...",   icon: "BarChart3" },
   improving:        { label: "Improve", activeDescription: "Generating personalized advice...",  icon: "Sparkles" },
   resume_generated: { label: "Rewrite", activeDescription: "Building your optimized CV...",      icon: "FileEdit" },
-  jobs_found:       { label: "Match",   activeDescription: "Finding relevant job openings...",   icon: "Briefcase" },
   complete:         { label: "Done",    activeDescription: "",                                   icon: "CheckCircle2" },
 };
 

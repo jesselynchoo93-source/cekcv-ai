@@ -4,16 +4,16 @@ import { searchJobs } from "@/lib/n8n";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { role, location, limit } = body;
+    const { jobId } = body;
 
-    if (!role) {
+    if (!jobId) {
       return NextResponse.json(
-        { success: false, error: "Role is required" },
+        { success: false, error: "jobId is required" },
         { status: 400 }
       );
     }
 
-    const result = await searchJobs(role, location || "Indonesia", limit || 10);
+    const result = await searchJobs(jobId);
     return NextResponse.json(result);
   } catch (error) {
     return NextResponse.json(

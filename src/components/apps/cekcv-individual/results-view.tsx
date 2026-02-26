@@ -65,11 +65,11 @@ export function ResultsView({ result, jobDescription, jobId, onReset }: ResultsV
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className={`space-y-6 ${tabContentClass}`}>
+        <TabsContent value="overview" className={`mt-6 space-y-6 ${tabContentClass}`}>
           <OverviewTab result={result} role={result.role} />
         </TabsContent>
 
-        <TabsContent value="improvements" className={`space-y-6 ${tabContentClass}`}>
+        <TabsContent value="improvements" className={`mt-6 space-y-6 ${tabContentClass}`}>
           <ImprovementsTab
             result={result}
             role={result.role}
@@ -78,12 +78,12 @@ export function ResultsView({ result, jobDescription, jobId, onReset }: ResultsV
           />
         </TabsContent>
 
-        <TabsContent value="resume" className={`space-y-6 ${tabContentClass}`}>
+        <TabsContent value="resume" className={`mt-6 space-y-6 ${tabContentClass}`}>
           <ResumeTab result={result} role={result.role} />
         </TabsContent>
 
-        <TabsContent value="jobs" className={`space-y-4 ${tabContentClass}`}>
-          <JobsTab result={result} role={result.role} />
+        <TabsContent value="jobs" className={`mt-6 space-y-4 ${tabContentClass}`}>
+          <JobsTab result={result} role={result.role} jobId={jobId} />
         </TabsContent>
       </Tabs>
 
@@ -114,7 +114,7 @@ export function ResultsView({ result, jobDescription, jobId, onReset }: ResultsV
               className="cekcv-gradient text-white hover:opacity-90"
               onClick={() => setActiveTab(nextTab)}
             >
-              {locale === "en" ? "Next" : "Lanjut"}: {tabLabels[nextTab]}
+              {t(r.next, locale)}: {tabLabels[nextTab]}
               <ArrowRight className="ml-1.5 h-4 w-4" />
             </Button>
           ) : (

@@ -7,6 +7,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CheckCircle2, XCircle } from "lucide-react";
+import { useLanguage } from "@/contexts/language-context";
+import { translations, t } from "@/lib/translations";
 import { ScoreGauge } from "../charts/score-gauge";
 import type { CekCVResult } from "../types";
 
@@ -16,7 +18,8 @@ const RadarChart = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex h-[300px] items-center justify-center text-sm text-muted-foreground">
-        Loading chart...
+        {/* fallback — translated version is in the component below */}
+        Loading...
       </div>
     ),
   }
@@ -30,6 +33,8 @@ interface OverviewTabProps {
 export function OverviewTab({ result, role }: OverviewTabProps) {
   const { current_assessment, score_breakdown, score_projection } = result;
   const score = current_assessment.overall_score;
+  const { locale } = useLanguage();
+  const r = translations.results;
 
   return (
     <div className="space-y-6">
@@ -46,14 +51,14 @@ export function OverviewTab({ result, role }: OverviewTabProps) {
       <div className={`grid gap-6 ${score_breakdown.length >= 3 ? "lg:grid-cols-2" : ""}`}>
         {score_breakdown.length >= 3 && (
           <div className="rounded-xl border p-4">
-            <h3 className="mb-3 text-sm font-semibold">Skill Match Profile</h3>
+            <h3 className="mb-3 text-sm font-semibold">{t(r.skillMatchProfile, locale)}</h3>
             <RadarChart data={score_breakdown} />
           </div>
         )}
 
         {score_breakdown.length > 0 && (
           <div className="rounded-xl border p-4">
-            <h3 className="mb-3 text-sm font-semibold">Score Breakdown</h3>
+            <h3 className="mb-3 text-sm font-semibold">{t(r.scoreBreakdown, locale)}</h3>
             <div className="space-y-2.5">
               {score_breakdown.map((item, i) => {
                 const pct =
@@ -80,8 +85,8 @@ export function OverviewTab({ result, role }: OverviewTabProps) {
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="text-xs">
-                        <span className="font-medium">{item.category}</span>: {pct}% match (
-                        {item.weighted_current} of {item.weighted_max} points)
+                        <span className="font-medium">{item.category}</span>: {pct}% {t(r.matchPct, locale)} (
+                        {item.weighted_current} {t(r.ofPoints, locale)} {item.weighted_max} {t(r.points, locale)})
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -95,32 +100,32 @@ export function OverviewTab({ result, role }: OverviewTabProps) {
       {/* Strengths & Gaps */}
       <div className="grid gap-6 sm:grid-cols-2">
         {current_assessment.strengths.length > 0 && (
-          <div className="space-y-2">
+          <div className="rounded-xl border p-4">
             <h3 className="flex items-center gap-1.5 text-sm font-semibold">
               <CheckCircle2 className="h-4 w-4 text-green-500" />
-              Strengths
+              {t(r.strengths, locale)}
             </h3>
-            <div className="space-y-1.5">
+            <div className="mt-3 space-y-2">
               {current_assessment.strengths.map((s, i) => (
-                <div key={i} className="flex items-start gap-2 pl-1 text-sm">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-green-500" />
-                  <span className="line-clamp-2">{s}</span>
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <span className="mt-1.5 shrink-0 text-green-500 dark:text-green-400">+</span>
+                  <span>{s}</span>
                 </div>
               ))}
             </div>
           </div>
         )}
         {current_assessment.gaps.length > 0 && (
-          <div className="space-y-2">
+          <div className="rounded-xl border p-4">
             <h3 className="flex items-center gap-1.5 text-sm font-semibold">
               <XCircle className="h-4 w-4 text-red-500" />
-              Gaps
+              {t(r.gapsToAddress, locale)}
             </h3>
-            <div className="space-y-1.5">
+            <div className="mt-3 space-y-2">
               {current_assessment.gaps.map((g, i) => (
-                <div key={i} className="flex items-start gap-2 pl-1 text-sm">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-red-500" />
-                  <span className="line-clamp-2">{g}</span>
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <span className="mt-1.5 shrink-0 text-red-500 dark:text-red-400">-</span>
+                  <span>{g}</span>
                 </div>
               ))}
             </div>

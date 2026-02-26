@@ -14,8 +14,8 @@ export const translations = {
     headlineHighlight: { en: "interview-ready", id: "siap interview" },
     headlineEnd: { en: "in 3 minutes", id: "dalam 3 menit" },
     subtitle: {
-      en: "Score your CV against any job description, get actionable improvements, an AI-rewritten resume, and matching job openings \u2014 all in one analysis.",
-      id: "Skor CV kamu terhadap job description apapun, dapatkan saran perbaikan, resume yang di-rewrite AI, dan lowongan kerja yang cocok \u2014 semua dalam satu analisis.",
+      en: "Score your CV against any job description, get actionable improvements, an AI-rewritten resume, and matching LinkedIn job openings \u2014 all in one analysis.",
+      id: "Skor CV kamu terhadap job description apapun, dapatkan saran perbaikan, resume yang di-rewrite AI, dan lowongan kerja LinkedIn yang cocok \u2014 semua dalam satu analisis.",
     },
     ctaAnalyze: { en: "Analyze My CV \u2014 Free", id: "Analisis CV Saya \u2014 Gratis" },
     ctaScreen: { en: "Screen Candidates", id: "Screening Kandidat" },
@@ -38,8 +38,8 @@ export const translations = {
     },
     step3Title: { en: "Get Results", id: "Lihat Hasil" },
     step3Desc: {
-      en: "ATS score, missing keywords, an improved CV, and matching job openings",
-      id: "Skor ATS, keyword yang kurang, CV yang lebih baik, dan lowongan kerja yang cocok",
+      en: "ATS score, missing keywords, an improved CV, and matching LinkedIn job openings",
+      id: "Skor ATS, keyword yang kurang, CV yang lebih baik, dan lowongan kerja LinkedIn yang cocok",
     },
 
     featTitle: { en: "What you get", id: "Apa yang kamu dapatkan" },
@@ -62,10 +62,10 @@ export const translations = {
       en: "Get an improved version of your CV with targeted keywords and better structure",
       id: "Dapatkan versi CV yang sudah diperbaiki dengan keyword yang tepat dan struktur yang lebih baik",
     },
-    feat4Title: { en: "Job Matching", id: "Job Matching" },
+    feat4Title: { en: "LinkedIn Job Matching", id: "LinkedIn Job Matching" },
     feat4Desc: {
-      en: "Discover relevant openings that match your profile, pulled from live job boards",
-      id: "Temukan lowongan yang cocok dengan profil kamu, diambil dari job board terkini",
+      en: "Discover relevant LinkedIn openings that match your profile, pulled directly from LinkedIn Jobs",
+      id: "Temukan lowongan LinkedIn yang cocok dengan profil kamu, diambil langsung dari LinkedIn Jobs",
     },
 
     // Company mode
@@ -134,7 +134,7 @@ export const translations = {
     },
     disclaimer: {
       en: "This project was built for the N8N Automation Competition by Anjas Maradita \u2014 Belajar AI Indonesia. All names, companies, and testimonials shown are fictional and for demonstration purposes only. By uploading your CV, you acknowledge that your file is sent to third-party AI services (OpenAI, Anthropic, Google) for analysis. Files are processed in-session and not permanently stored.",
-      id: "Proyek ini dibuat untuk Kompetisi Automasi N8N oleh Anjas Maradita \u2014 Belajar AI Indonesia. Semua nama, perusahaan, dan testimoni yang ditampilkan adalah fiktif dan hanya untuk keperluan demo. Dengan meng-upload CV, kamu menyetujui bahwa file dikirim ke layanan AI pihak ketiga (OpenAI, Anthropic, Google) untuk dianalisis. File diproses dalam sesi dan tidak disimpan secara permanen.",
+      id: "Proyek ini dibuat untuk Kompetisi Automasi N8N Anjas Maradita \u2014 Belajar AI Indonesia. Semua nama, perusahaan, dan testimoni yang ditampilkan adalah fiktif dan hanya untuk keperluan demo. Dengan meng-upload CV, kamu menyetujui bahwa file dikirim ke layanan AI pihak ketiga (OpenAI, Anthropic, Google) untuk dianalisis. File diproses dalam sesi dan tidak disimpan secara permanen.",
     },
   },
 
@@ -148,13 +148,19 @@ export const translations = {
     labelCV: { en: "CV / Resume", id: "CV / Resume" },
     dropText: { en: "Drag & drop your CV or click to browse", id: "Drag & drop CV kamu atau klik untuk browse" },
     dropHover: { en: "Drop your file here", id: "Lepas file di sini" },
-    fileTypes: { en: "PDF & DOCX accepted", id: "PDF & DOCX diterima" },
+    fileTypes: { en: "PDF accepted", id: "PDF diterima" },
     labelJD: { en: "Job Description / Target Role", id: "Job Description / Target Role" },
     jdPlaceholder: {
       en: "Paste the job description here, or describe your target role...",
       id: "Paste job description di sini, atau deskripsikan target posisi kamu...",
     },
-    uploadError: { en: "Please upload a PDF or DOCX file", id: "Upload file PDF atau DOCX" },
+    jdOrLabel: { en: "Or", id: "Atau" },
+    jdLinkedinPlaceholder: {
+      en: "Paste LinkedIn job posting link...",
+      id: "Paste link lowongan LinkedIn...",
+    },
+    jdLinkedinExample: { en: "e.g. linkedin.com/jobs/view/12345", id: "cth. linkedin.com/jobs/view/12345" },
+    uploadError: { en: "Please upload a PDF file", id: "Upload file PDF" },
     submitBtn: { en: "Analyze My CV", id: "Analisis CV Saya" },
     submitting: { en: "Submitting...", id: "Mengirim..." },
     privacy: {
@@ -177,17 +183,98 @@ export const translations = {
     remaining: { en: "remaining", id: "tersisa" },
     yourCV: { en: "Your CV", id: "CV Kamu" },
     targetJob: { en: "Target Job", id: "Target Pekerjaan" },
+    nMore: { en: "more", id: "lainnya" },
     connectionIssue: { en: "Connection issue", id: "Masalah koneksi" },
     cancel: { en: "Cancel", id: "Batal" },
   },
 
+  // ── Form (Company) ──
+  companyForm: {
+    title: { en: "Batch Candidate Screening", id: "Screening Kandidat Massal" },
+    subtitle: {
+      en: "Upload multiple CVs and a job description to rank candidates by fit",
+      id: "Upload beberapa CV dan job description untuk me-ranking kandidat",
+    },
+    labelRole: { en: "Role Name", id: "Nama Posisi" },
+    rolePlaceholder: { en: "e.g. Senior Software Engineer", id: "cth. Senior Software Engineer" },
+    labelJD: { en: "Job Description", id: "Job Description" },
+    jdPlaceholder: { en: "Paste the full job description...", id: "Paste job description lengkap..." },
+    jdOrLabel: { en: "Or", id: "Atau" },
+    jdLinkedinPlaceholder: {
+      en: "Paste LinkedIn job posting link...",
+      id: "Paste link lowongan LinkedIn...",
+    },
+    jdLinkedinExample: { en: "e.g. linkedin.com/jobs/view/12345", id: "cth. linkedin.com/jobs/view/12345" },
+    labelCVs: { en: "Candidate CVs", id: "CV Kandidat" },
+    dropText: { en: "Drag & drop CVs or click to browse", id: "Drag & drop CV atau klik untuk browse" },
+    dropHover: { en: "Drop files here", id: "Lepas file di sini" },
+    fileTypes: { en: "PDF accepted \u00b7 Max 5 files", id: "PDF diterima \u00b7 Maks 5 file" },
+    uploadError: { en: "Only PDF files are accepted", id: "Hanya file PDF yang diterima" },
+    maxFilesError: { en: "Maximum 5 CVs allowed per batch", id: "Maksimal 5 CV per batch" },
+    filesSelected: { en: "{count} file(s) selected", id: "{count} file dipilih" },
+    removeFile: { en: "Remove", id: "Hapus" },
+    submitBtn: { en: "Screen {count} Candidate(s)", id: "Screening {count} Kandidat" },
+    submitting: { en: "Submitting...", id: "Mengirim..." },
+    privacy: {
+      en: "CVs are processed securely and never stored permanently",
+      id: "CV diproses dengan aman dan tidak pernah disimpan permanen",
+    },
+    errorConnect: { en: "Failed to connect to the server", id: "Gagal terhubung ke server" },
+    errorStart: { en: "Failed to start screening", id: "Gagal memulai screening" },
+    // Progress
+    progressTitle: { en: "Screening Candidates", id: "Sedang Screening Kandidat" },
+    progressStarting: { en: "Starting batch analysis...", id: "Memulai analisis batch..." },
+    progressBatch: { en: "Processing batch of {count} CVs...", id: "Memproses {count} CV secara batch..." },
+    progressAnalyzing: { en: "Analyzing candidate CVs...", id: "Menganalisis CV kandidat..." },
+    progressScoring: { en: "Scoring candidates against job requirements...", id: "Menilai kandidat terhadap persyaratan kerja..." },
+    progressRanking: { en: "Ranking candidates by fit...", id: "Meranking kandidat berdasarkan kecocokan..." },
+    progressCandidate: { en: "Candidate {current} of {total}", id: "Kandidat {current} dari {total}" },
+    // Error
+    errorTitle: { en: "Screening Failed", id: "Screening Gagal" },
+    errorUnknown: { en: "An unknown error occurred", id: "Terjadi kesalahan yang tidak diketahui" },
+    tryAgain: { en: "Try Again", id: "Coba Lagi" },
+    // Results
+    resultsTitle: { en: "Screening Results", id: "Hasil Screening" },
+    candidatesRanked: { en: "{count} candidate(s) ranked by score", id: "{count} kandidat diurutkan berdasarkan skor" },
+    strengths: { en: "Strengths", id: "Kekuatan" },
+    gaps: { en: "Gaps", id: "Kekurangan" },
+    score: { en: "score", id: "skor" },
+    noResults: { en: "No candidate results available. The batch may still be processing.", id: "Belum ada hasil kandidat. Batch mungkin masih diproses." },
+    screenMore: { en: "Screen More Candidates", id: "Screening Kandidat Lagi" },
+    cancel: { en: "Cancel", id: "Batal" },
+    // Dashboard
+    searchPlaceholder: { en: "Search candidates...", id: "Cari kandidat..." },
+    filterAll: { en: "All", id: "Semua" },
+    filterShortlist: { en: "Shortlist", id: "Shortlist" },
+    filterReview: { en: "Review", id: "Review" },
+    filterReject: { en: "Reject", id: "Tolak" },
+    sortBy: { en: "Sort by:", id: "Urutkan:" },
+    sortScore: { en: "Score", id: "Skor" },
+    sortName: { en: "Name", id: "Nama" },
+    sortStatus: { en: "Status", id: "Status" },
+    share: { en: "Share", id: "Bagikan" },
+    copied: { en: "Copied!", id: "Tersalin!" },
+    exportCSV: { en: "Export CSV", id: "Ekspor CSV" },
+    printPDF: { en: "Print / PDF", id: "Cetak / PDF" },
+    compare: { en: "Compare", id: "Bandingkan" },
+    compareCandidates: { en: "Compare Candidates", id: "Bandingkan Kandidat" },
+    backToList: { en: "Back to list", id: "Kembali" },
+    noFilterMatch: { en: "No candidates match your filters", id: "Tidak ada kandidat yang cocok dengan filter" },
+    overall: { en: "Overall", id: "Keseluruhan" },
+    mustHave: { en: "Must-Have", id: "Wajib" },
+    niceToHave: { en: "Nice-to-Have", id: "Nilai Tambah" },
+    source: { en: "Source", id: "Sumber" },
+    email: { en: "Email", id: "Email" },
+    whatsapp: { en: "WhatsApp", id: "WhatsApp" },
+  },
+
   // ── Step labels ──
   steps: {
-    upload: { en: "Upload", id: "Upload" },
+    upload: { en: "Upload", id: "Unggah" },
     analyze: { en: "Analyze", id: "Analisis" },
     score: { en: "Score", id: "Skor" },
     improve: { en: "Improve", id: "Perbaikan" },
-    rewrite: { en: "Rewrite", id: "Rewrite" },
+    rewrite: { en: "Rewrite", id: "Tulis Ulang" },
     match: { en: "Match", id: "Cocokkan" },
     done: { en: "Done", id: "Selesai" },
   },
@@ -213,11 +300,98 @@ export const translations = {
     tryAgain: { en: "Try Again", id: "Coba Lagi" },
     analyzeAnother: { en: "Analyze Another CV", id: "Analisis CV Lain" },
 
+    // ATS tooltip explanations
+    atsTooltipHigh: {
+      en: "Your CV meets the key requirements for this role. ATS systems would likely advance it to the recruiter.",
+      id: "CV kamu memenuhi persyaratan utama untuk posisi ini. Sistem ATS kemungkinan besar akan meneruskannya ke recruiter.",
+    },
+    atsTooltipMid: {
+      en: "Your CV partially matches this role. ATS systems may flag it for manual review, but it's not a strong pass.",
+      id: "CV kamu sebagian cocok dengan posisi ini. Sistem ATS mungkin menandainya untuk review manual, tapi belum cukup kuat untuk lolos.",
+    },
+    atsTooltipLow: {
+      en: "Your CV lacks critical keywords and qualifications for this role. Most ATS systems would filter it out before a recruiter sees it.",
+      id: "CV kamu kurang keyword dan kualifikasi penting untuk posisi ini. Sebagian besar sistem ATS akan menyaringnya sebelum dilihat recruiter.",
+    },
+
     // Tab labels
     overview: { en: "Overview", id: "Ringkasan" },
     improvements: { en: "Improvements", id: "Perbaikan" },
     improvedCV: { en: "Improved CV", id: "CV Perbaikan" },
     jobMatches: { en: "Job Matches", id: "Lowongan Cocok" },
+    next: { en: "Next", id: "Lanjut" },
+
+    // Overview tab
+    skillMatchProfile: { en: "Skill Match Profile", id: "Profil Kecocokan Skill" },
+    scoreBreakdown: { en: "Score Breakdown", id: "Rincian Skor" },
+    strengths: { en: "Strengths", id: "Kekuatan" },
+    gapsToAddress: { en: "Gaps to Address", id: "Kekurangan yang Perlu Diperbaiki" },
+    outOf100: { en: "out of 100", id: "dari 100" },
+    potentialLabel: { en: "Potential", id: "Potensi" },
+    points: { en: "points", id: "poin" },
+    matchPct: { en: "match", id: "kecocokan" },
+    ofPoints: { en: "of", id: "dari" },
+    loadingChart: { en: "Loading chart...", id: "Memuat grafik..." },
+
+    // Improvements tab
+    howToImprove: { en: "How to improve your CV for", id: "Cara meningkatkan CV kamu untuk" },
+    thisRole: { en: "this role", id: "posisi ini" },
+    applied: { en: "applied", id: "diterapkan" },
+    estScore: { en: "est. score", id: "est. skor" },
+    highestImpact: { en: "Highest impact changes", id: "Perubahan berdampak tertinggi" },
+    missingKeywords: { en: "Missing Keywords", id: "Keyword yang Kurang" },
+    additionalSuggestions: { en: "Additional Suggestions", id: "Saran Tambahan" },
+    atsFormattingTips: { en: "ATS Formatting Tips", id: "Tips Format ATS" },
+    highImpact: { en: "High Impact", id: "Dampak Tinggi" },
+    mediumImpact: { en: "Medium", id: "Sedang" },
+    lowImpact: { en: "Low", id: "Rendah" },
+
+    // Resume tab
+    cvOptimizedFor: { en: "Your CV, optimized for", id: "CV kamu, dioptimasi untuk" },
+    cvGenerated: { en: "Your improved CV has been generated", id: "CV kamu yang sudah diperbaiki telah dibuat" },
+    cvOptimizedDesc: {
+      en: "Optimized with targeted keywords and restructured for maximum ATS compatibility",
+      id: "Dioptimasi dengan keyword yang tepat dan direstruktur untuk kompatibilitas ATS maksimal",
+    },
+    savePDF: { en: "Save PDF", id: "Simpan PDF" },
+    downloadCV: { en: "Download CV", id: "Unduh CV" },
+    processing: { en: "Processing...", id: "Memproses..." },
+    scoreImpact: {
+      en: "Applying these changes can raise your score from",
+      id: "Menerapkan perubahan ini dapat menaikkan skor kamu dari",
+    },
+    to: { en: "to", id: "menjadi" },
+    pts: { en: "pts", id: "poin" },
+    changesMade: { en: "Changes made to match this role", id: "Perubahan yang dilakukan untuk posisi ini" },
+    keywordsAdded: { en: "Keywords added to your CV", id: "Keyword yang ditambahkan ke CV kamu" },
+
+    // Jobs tab
+    similarRoles: { en: "Similar roles you'd be a good fit for", id: "Posisi serupa yang cocok untuk kamu" },
+    foundJobs: { en: "Found {count} relevant jobs", id: "Ditemukan {count} lowongan relevan" },
+    forQuery: { en: "for", id: "untuk" },
+    strong: { en: "strong", id: "kuat" },
+    moderate: { en: "moderate", id: "sedang" },
+    low: { en: "low", id: "rendah" },
+    findingJobs: { en: "Finding matching jobs for you...", id: "Mencari lowongan yang cocok untuk kamu..." },
+    noJobsFound: { en: "No matching jobs found for this role", id: "Tidak ada lowongan yang cocok untuk posisi ini" },
+    jobsAvailableLater: {
+      en: "Job matching will be available once the search completes",
+      id: "Pencocokan lowongan akan tersedia setelah pencarian selesai",
+    },
+    searchFor: { en: "Search keywords", id: "Kata kunci pencarian" },
+    searchJobsBtn: { en: "Search LinkedIn Jobs", id: "Cari Lowongan LinkedIn" },
+    jobSearchCta: {
+      en: "Ready to find your next opportunity?",
+      id: "Siap menemukan peluang berikutnya?",
+    },
+    jobSearchCtaDesc: {
+      en: "We'll search LinkedIn for open positions that match your CV profile and skills. Results typically include 10\u201320 relevant job openings.",
+      id: "Kami akan mencari lowongan di LinkedIn yang cocok dengan profil dan skill CV kamu. Biasanya menghasilkan 10\u201320 lowongan relevan.",
+    },
+    jobSearchNote: {
+      en: "Search takes about 1\u20132 minutes",
+      id: "Pencarian membutuhkan sekitar 1\u20132 menit",
+    },
   },
 
   // ── Rotating tips ──
