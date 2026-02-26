@@ -86,19 +86,19 @@ type StatusFilter = "all" | "shortlist" | "review" | "reject";
 // ── Helpers ──
 
 function scoreColor(score: number) {
-  if (score >= 75) return "text-green-600 dark:text-green-400";
+  if (score >= 75) return "text-blue-600 dark:text-blue-400";
   if (score >= 50) return "text-yellow-600 dark:text-yellow-400";
   return "text-red-600 dark:text-red-400";
 }
 
 function scoreBgClass(score: number) {
-  if (score >= 75) return "bg-green-50 dark:bg-green-950/30 border-green-200 dark:border-green-800/50";
+  if (score >= 75) return "bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800/50";
   if (score >= 50) return "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-800/50";
   return "bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/50";
 }
 
 function scoreBarColor(score: number) {
-  if (score >= 75) return "bg-green-500";
+  if (score >= 75) return "bg-blue-500";
   if (score >= 50) return "bg-yellow-500";
   return "bg-red-500";
 }
@@ -220,7 +220,7 @@ function BatchOverview({
           <div className="mt-2 flex items-end gap-1" style={{ height: 32 }}>
             {[dist.high, dist.mid, dist.low].map((count, i) => {
               const pct = total ? (count / total) * 100 : 0;
-              const colors = ["bg-green-500", "bg-yellow-500", "bg-red-400"];
+              const colors = ["bg-blue-500", "bg-yellow-500", "bg-red-400"];
               return (
                 <div key={i} className="flex flex-1 flex-col items-center gap-0.5">
                   <span className="text-[10px] font-medium">{count}</span>
@@ -249,10 +249,10 @@ function BatchOverview({
 
         {/* Shortlisted */}
         <div className="rounded-xl border bg-card p-4">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-green-600 dark:text-green-400">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-blue-600 dark:text-blue-400">
             {locale === "en" ? "Shortlisted" : "Shortlist"}
           </p>
-          <p className="mt-1 text-3xl font-bold text-green-600 dark:text-green-400">{shortlisted}</p>
+          <p className="mt-1 text-3xl font-bold text-blue-600 dark:text-blue-400">{shortlisted}</p>
           <p className="text-[11px] text-muted-foreground">
             {review} {locale === "en" ? "review" : "review"} · {rejected} {locale === "en" ? "reject" : "tolak"}
           </p>
@@ -536,7 +536,7 @@ function CandidateDetail({
                     const w = weight as number;
                     return (
                       <span key={key} className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] ${
-                        w >= 7 ? "border-green-200 bg-green-50 dark:border-green-900 dark:bg-green-950/30" : "bg-muted/30"
+                        w >= 7 ? "border-blue-200 bg-blue-50 dark:border-blue-900 dark:bg-blue-950/30" : "bg-muted/30"
                       }`}>
                         {label ? (locale === "en" ? label.en : label.id) : key}
                         <span className="font-bold">{w}/10</span>
@@ -551,14 +551,14 @@ function CandidateDetail({
           {/* Strengths & Gaps */}
           <div className="grid gap-3 sm:grid-cols-2">
             {c.strengths?.length > 0 && (
-              <div className="rounded-lg border border-green-200/50 bg-green-50/30 p-4 dark:border-green-900/30 dark:bg-green-950/10">
-                <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-green-700 dark:text-green-400">
+              <div className="rounded-lg border border-blue-200/50 bg-blue-50/30 p-4 dark:border-blue-900/30 dark:bg-blue-950/10">
+                <h4 className="mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400">
                   <TrendingUp className="h-3.5 w-3.5" />
                   {t(f.strengths, locale)} ({c.strengths.length})
                 </h4>
                 <div className="flex flex-wrap gap-1.5">
                   {c.strengths.map((s, j) => (
-                    <span key={j} className="inline-block rounded-md border border-green-200 bg-green-100/50 px-2 py-0.5 text-xs dark:border-green-800 dark:bg-green-900/30">
+                    <span key={j} className="inline-block rounded-md border border-blue-200 bg-blue-100/50 px-2 py-0.5 text-xs dark:border-blue-800 dark:bg-blue-900/30">
                       {s}
                     </span>
                   ))}
@@ -807,10 +807,10 @@ function CompareView({
                 {/* Strengths */}
                 {c.strengths?.length > 0 && (
                   <div>
-                    <p className="mb-1 text-[10px] font-semibold uppercase text-green-700 dark:text-green-400">{t(f.strengths, locale)}</p>
+                    <p className="mb-1 text-[10px] font-semibold uppercase text-blue-700 dark:text-blue-400">{t(f.strengths, locale)}</p>
                     <div className="flex flex-wrap gap-1">
                       {c.strengths.slice(0, 4).map((s, j) => (
-                        <span key={j} className="rounded border border-green-200 bg-green-50 px-1.5 py-0.5 text-[10px] dark:border-green-800 dark:bg-green-900/30">{s}</span>
+                        <span key={j} className="rounded border border-blue-200 bg-blue-50 px-1.5 py-0.5 text-[10px] dark:border-blue-800 dark:bg-blue-900/30">{s}</span>
                       ))}
                     </div>
                   </div>

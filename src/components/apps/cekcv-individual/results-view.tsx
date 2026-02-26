@@ -11,6 +11,7 @@ import { OverviewTab } from "./tabs/overview-tab";
 import { ImprovementsTab } from "./tabs/improvements-tab";
 import { ResumeTab } from "./tabs/resume-tab";
 import { JobsTab } from "./tabs/jobs-tab";
+import { useAutoJobSearch } from "./hooks/use-auto-job-search";
 import type { CekCVResult } from "./types";
 
 interface ResultsViewProps {
@@ -29,6 +30,7 @@ export function ResultsView({ result, jobDescription, jobId, onReset }: ResultsV
   const [activeTab, setActiveTab] = useState("overview");
   const { locale } = useLanguage();
   const r = translations.results;
+  const jobSearch = useAutoJobSearch(jobId);
 
   const tabLabels: Record<string, string> = {
     overview: t(r.overview, locale),
@@ -83,7 +85,7 @@ export function ResultsView({ result, jobDescription, jobId, onReset }: ResultsV
         </TabsContent>
 
         <TabsContent value="jobs" className={`mt-6 space-y-4 ${tabContentClass}`}>
-          <JobsTab result={result} role={result.role} jobId={jobId} />
+          <JobsTab result={result} role={result.role} jobSearch={jobSearch} />
         </TabsContent>
       </Tabs>
 

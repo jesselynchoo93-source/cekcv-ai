@@ -102,13 +102,13 @@ export function OverviewTab({ result, role }: OverviewTabProps) {
         {current_assessment.strengths.length > 0 && (
           <div className="rounded-xl border p-4">
             <h3 className="flex items-center gap-1.5 text-sm font-semibold">
-              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <CheckCircle2 className="h-4 w-4 text-blue-500" />
               {t(r.strengths, locale)}
             </h3>
             <div className="mt-3 space-y-2">
               {current_assessment.strengths.map((s, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm">
-                  <span className="mt-1.5 shrink-0 text-green-500 dark:text-green-400">+</span>
+                  <span className="mt-1.5 shrink-0 text-blue-500 dark:text-blue-400">+</span>
                   <span>{s}</span>
                 </div>
               ))}

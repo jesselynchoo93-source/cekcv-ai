@@ -370,13 +370,17 @@ export const translations = {
     keywordsAdded: { en: "Keywords added to your CV", id: "Keyword yang ditambahkan ke CV kamu" },
 
     // Jobs tab
-    similarRoles: { en: "Open positions matching your CV profile", id: "Lowongan yang cocok dengan profil CV kamu" },
-    foundJobs: { en: "Found {count} relevant jobs", id: "Ditemukan {count} lowongan relevan" },
+    similarRoles: { en: "Jobs you're qualified for", id: "Lowongan yang cocok untuk kamu" },
+    similarRolesDesc: {
+      en: "Based on your CV, we think you'd be a strong candidate for these roles — all posted in the last 7 days.",
+      id: "Berdasarkan CV kamu, kami yakin kamu kandidat yang kuat untuk posisi-posisi ini — semua diposting dalam 7 hari terakhir.",
+    },
+    foundJobs: { en: "{count} jobs found", id: "{count} lowongan ditemukan" },
     forQuery: { en: "for", id: "untuk" },
     strong: { en: "strong", id: "kuat" },
     moderate: { en: "moderate", id: "sedang" },
     low: { en: "low", id: "rendah" },
-    findingJobs: { en: "Finding matching jobs for you...", id: "Mencari lowongan yang cocok untuk kamu..." },
+    findingJobs: { en: "Searching jobs based on your CV...", id: "Mencari lowongan berdasarkan CV kamu..." },
     noJobsFound: { en: "No matching jobs found for this role", id: "Tidak ada lowongan yang cocok untuk posisi ini" },
     jobsAvailableLater: {
       en: "Job matching will be available once the search completes",
@@ -385,18 +389,141 @@ export const translations = {
     searchFor: { en: "Search keywords", id: "Kata kunci pencarian" },
     searchJobsBtn: { en: "Search LinkedIn Jobs", id: "Cari Lowongan LinkedIn" },
     jobSearchCta: {
-      en: "Find jobs that match your skills",
-      id: "Temukan lowongan yang cocok dengan skill kamu",
+      en: "Find jobs that match your CV",
+      id: "Temukan lowongan yang cocok dengan CV kamu",
     },
     jobSearchCtaDesc: {
-      en: "We'll search LinkedIn for openings based on the skills and experience from your CV \u2014 not the target role. Typically returns 10\u201320 results.",
-      id: "Kami akan mencari lowongan di LinkedIn berdasarkan skill dan pengalaman dari CV kamu \u2014 bukan target posisi. Biasanya menghasilkan 10\u201320 hasil.",
+      en: "We'll search LinkedIn for recent openings (last 7 days) based on the skills and experience from your CV. Typically returns 10\u201320 results.",
+      id: "Kami akan mencari lowongan terbaru di LinkedIn (7 hari terakhir) berdasarkan skill dan pengalaman dari CV kamu. Biasanya menghasilkan 10\u201320 hasil.",
     },
     jobSearchNote: {
       en: "Search takes about 1\u20132 minutes",
       id: "Pencarian membutuhkan sekitar 1\u20132 menit",
     },
   },
+
+  // ── ATS Guide (floating panel on results page) ──
+  atsGuide: {
+    btnLabel: { en: "ATS Guide", id: "Panduan ATS" },
+    title: { en: "Understanding Your ATS Score", id: "Memahami Skor ATS Kamu" },
+    subtitle: {
+      en: "Learn what your score means and how ATS systems work",
+      id: "Pelajari arti skor kamu dan cara kerja sistem ATS",
+    },
+
+    // Personalized verdict
+    yourScore: { en: "Your score", id: "Skor kamu" },
+    verdictHigh: {
+      en: "Your CV is well-matched for this role. Most ATS systems would advance it to a recruiter for review.",
+      id: "CV kamu cocok dengan posisi ini. Sebagian besar sistem ATS akan meneruskannya ke recruiter.",
+    },
+    verdictMid: {
+      en: "Your CV partially matches this role. Some ATS systems may flag it for manual review, but it's not a confident pass. Focus on the missing keywords and improvements.",
+      id: "CV kamu sebagian cocok dengan posisi ini. Beberapa sistem ATS mungkin menandainya untuk review manual, tapi belum cukup kuat untuk lolos. Fokus pada keyword yang kurang dan saran perbaikan.",
+    },
+    verdictLow: {
+      en: "Your CV is missing critical keywords and qualifications for this role. Most ATS systems would filter it out before a recruiter ever sees it.",
+      id: "CV kamu kurang keyword dan kualifikasi penting untuk posisi ini. Sebagian besar sistem ATS akan menyaringnya sebelum dilihat recruiter.",
+    },
+
+    // Potential score explanation
+    potentialTitle: { en: "About your potential score", id: "Tentang skor potensi kamu" },
+    potentialExplainGood: {
+      en: "With the suggested improvements, your score could reach {potential}, which puts you in a strong position to pass ATS screening.",
+      id: "Dengan saran perbaikan yang diberikan, skor kamu bisa mencapai {potential}, yang menempatkan kamu di posisi kuat untuk lolos ATS screening.",
+    },
+    potentialExplainOk: {
+      en: "Even with all improvements applied, your score would reach around {potential}. This is still in the 'maybe' zone for ATS \u2014 your CV may get reviewed, but isn't a strong pass. Consider gaining more relevant experience or certifications for this specific role.",
+      id: "Bahkan dengan semua perbaikan yang diterapkan, skor kamu akan mencapai sekitar {potential}. Ini masih di zona 'mungkin' untuk ATS \u2014 CV kamu mungkin akan di-review, tapi belum cukup kuat. Pertimbangkan untuk menambah pengalaman atau sertifikasi yang relevan untuk posisi ini.",
+    },
+    potentialExplainLow: {
+      en: "Even with all improvements, your score would only reach around {potential}. This means there's a fundamental gap between your current profile and this role's requirements \u2014 ATS would likely still filter you out. This doesn't mean you're not capable! Consider: applying for a more junior version of this role, gaining specific skills listed in the JD, or targeting roles that better match your current experience.",
+      id: "Bahkan dengan semua perbaikan, skor kamu hanya bisa mencapai sekitar {potential}. Ini berarti ada gap fundamental antara profil kamu saat ini dan persyaratan posisi ini \u2014 ATS kemungkinan masih akan menyaring kamu. Ini bukan berarti kamu tidak mampu! Pertimbangkan: melamar posisi yang lebih junior, menambah skill spesifik dari JD, atau menargetkan posisi yang lebih sesuai dengan pengalaman kamu saat ini.",
+    },
+
+    // Score ranges section
+    scaleTitle: { en: "ATS Score Ranges", id: "Rentang Skor ATS" },
+    range70: { en: "70\u2013100: Likely to pass ATS", id: "70\u2013100: Kemungkinan besar lolos ATS" },
+    range70Desc: {
+      en: "Your CV matches most key requirements. Recruiters will likely see it.",
+      id: "CV kamu cocok dengan sebagian besar persyaratan utama. Recruiter kemungkinan besar akan melihatnya.",
+    },
+    range50: { en: "50\u201369: Borderline", id: "50\u201369: Garis batas" },
+    range50Desc: {
+      en: "May pass some ATS systems but not others. Often lands in the 'maybe' pile for manual review.",
+      id: "Mungkin lolos beberapa sistem ATS tapi tidak semua. Sering masuk tumpukan 'mungkin' untuk review manual.",
+    },
+    range0: { en: "0\u201349: Likely filtered out", id: "0\u201349: Kemungkinan besar tersaring" },
+    range0Desc: {
+      en: "Most ATS systems would reject this CV before a human sees it. Major keyword gaps or qualification mismatches.",
+      id: "Sebagian besar sistem ATS akan menolak CV ini sebelum dilihat manusia. Ada gap besar pada keyword atau kualifikasi.",
+    },
+
+    // FAQ section
+    faqTitle: { en: "Common Questions", id: "Pertanyaan Umum" },
+    faq1Q: { en: "What is an ATS?", id: "Apa itu ATS?" },
+    faq1A: {
+      en: "An Applicant Tracking System (ATS) is software that companies use to scan, filter, and rank resumes before a human recruiter ever sees them. Over 75% of large companies use an ATS.",
+      id: "Applicant Tracking System (ATS) adalah software yang digunakan perusahaan untuk memindai, menyaring, dan meranking resume sebelum recruiter melihatnya. Lebih dari 75% perusahaan besar menggunakan ATS.",
+    },
+    faq2Q: { en: "Why is my score low?", id: "Kenapa skor saya rendah?" },
+    faq2A: {
+      en: "A low score usually means your CV is missing keywords from the job description, lacks quantified achievements, or has formatting that ATS can't parse well. Check the Improvements tab for specific fixes.",
+      id: "Skor rendah biasanya berarti CV kamu kurang keyword dari job description, tidak punya pencapaian yang terukur, atau formatnya sulit dibaca ATS. Cek tab Perbaikan untuk saran spesifik.",
+    },
+    faq3Q: {
+      en: "Can I still get the job with a low score?",
+      id: "Apakah masih bisa dapat kerja dengan skor rendah?",
+    },
+    faq3A: {
+      en: "Yes! ATS is just the first filter. If you can get a referral, reach the hiring manager directly, or apply through channels that bypass ATS (like company career events), your score matters less. Networking fills 80% of positions.",
+      id: "Bisa! ATS hanyalah filter pertama. Kalau kamu bisa dapat referral, menghubungi hiring manager langsung, atau melamar lewat jalur yang bypass ATS (seperti career event perusahaan), skor kamu kurang berpengaruh. Networking mengisi 80% posisi.",
+    },
+    faq4Q: {
+      en: "Why can't improvements get me to 100?",
+      id: "Kenapa perbaikan tidak bisa membuat skor saya 100?",
+    },
+    faq4A: {
+      en: "CV improvements can only optimize how you present your existing experience. If the role requires 5 years of experience and you have 2, or requires certifications you don't have, no amount of rewording will close that gap. The potential score shows the realistic ceiling with your current background.",
+      id: "Perbaikan CV hanya bisa mengoptimalkan cara kamu mempresentasikan pengalaman yang ada. Kalau posisi membutuhkan 5 tahun pengalaman dan kamu punya 2, atau butuh sertifikasi yang belum kamu punya, tidak ada revisi kata-kata yang bisa menutup gap itu. Skor potensi menunjukkan batas realistis dengan latar belakang kamu saat ini.",
+    },
+  },
+
+  // ── Job search tips (shown while searching) ──
+  jobTips: [
+    {
+      en: "Tailor your cover letter for each application \u2014 generic ones get ignored",
+      id: "Sesuaikan cover letter untuk setiap lamaran \u2014 yang generik sering diabaikan",
+    },
+    {
+      en: "Apply within 24 hours of a posting for the best chance of being seen",
+      id: "Lamar dalam 24 jam sejak lowongan diposting untuk peluang terbaik dilihat recruiter",
+    },
+    {
+      en: "Follow the company on LinkedIn before applying \u2014 it shows genuine interest",
+      id: "Follow perusahaan di LinkedIn sebelum melamar \u2014 ini menunjukkan ketertarikan asli",
+    },
+    {
+      en: "80% of jobs are filled through networking, not job boards",
+      id: "80% lowongan diisi melalui networking, bukan job board",
+    },
+    {
+      en: "Reach out to the hiring manager directly \u2014 a short, personal message stands out",
+      id: "Hubungi hiring manager langsung \u2014 pesan singkat dan personal akan menonjol",
+    },
+    {
+      en: "Prepare 2\u20133 questions about the role before applying \u2014 it sharpens your pitch",
+      id: "Siapkan 2\u20133 pertanyaan tentang posisi sebelum melamar \u2014 ini mempertajam pitch kamu",
+    },
+    {
+      en: "Use the exact job title from the posting in your application \u2014 ATS matches keywords",
+      id: "Gunakan judul posisi yang sama persis dari lowongan \u2014 ATS mencocokkan keyword",
+    },
+    {
+      en: "Research the company\u2019s recent news \u2014 mentioning it in your cover letter shows initiative",
+      id: "Riset berita terbaru perusahaan \u2014 menyebutkannya di cover letter menunjukkan inisiatif",
+    },
+  ],
 
   // ── Rotating tips ──
   tips: [

@@ -25,14 +25,14 @@ export function ScoreGauge({ currentScore, potentialScore, size = 200 }: ScoreGa
 
   const scoreColor =
     currentScore >= 80
-      ? "stroke-green-500"
+      ? "stroke-blue-500"
       : currentScore >= 60
         ? "stroke-yellow-500"
         : "stroke-red-500";
 
   const textColor =
     currentScore >= 80
-      ? "text-green-500"
+      ? "text-blue-500"
       : currentScore >= 60
         ? "text-yellow-500"
         : "text-red-500";
@@ -54,7 +54,7 @@ export function ScoreGauge({ currentScore, potentialScore, size = 200 }: ScoreGa
           d={`M ${strokeWidth} ${center} A ${radius} ${radius} 0 0 1 ${size - strokeWidth} ${center}`}
           fill="none"
           strokeWidth={strokeWidth}
-          className="stroke-green-500/20"
+          className="stroke-blue-500/20"
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={potentialOffset}
@@ -93,7 +93,7 @@ export function ScoreGauge({ currentScore, potentialScore, size = 200 }: ScoreGa
       </svg>
       {potentialScore > currentScore && (
         <p className="mt-1 text-sm text-muted-foreground">
-          {t(r.potentialLabel, locale)}: <span className="font-semibold text-green-500">{potentialScore}</span>
+          {t(r.potentialLabel, locale)}: <span className="font-semibold text-blue-500">{potentialScore}</span>
           <span className="ml-1 text-xs">(+{potentialScore - currentScore} {t(r.points, locale)})</span>
         </p>
       )}

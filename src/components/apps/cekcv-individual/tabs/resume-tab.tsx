@@ -113,16 +113,16 @@ export function ResumeTab({ result, role }: ResumeTabProps) {
 
       {/* Score Impact — compact inline to avoid duplicating header scores */}
       {potentialGain > 0 && (
-        <div className="flex items-center gap-3 rounded-xl border bg-green-50/50 px-4 py-3 dark:bg-green-950/10">
-          <ArrowRight className="h-4 w-4 shrink-0 text-green-500" />
+        <div className="flex items-center gap-3 rounded-xl border bg-blue-50/50 px-4 py-3 dark:bg-blue-950/10">
+          <ArrowRight className="h-4 w-4 shrink-0 text-blue-500" />
           <p className="text-sm">
             {t(r.scoreImpact, locale)}{" "}
             <span className="font-semibold">{score_projection.current_score}</span> {t(r.to, locale)}{" "}
-            <span className="font-semibold text-green-600 dark:text-green-400">
+            <span className="font-semibold text-blue-600 dark:text-blue-400">
               {score_projection.estimated_improved_score}
             </span>
           </p>
-          <Badge className="ml-auto shrink-0 bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+          <Badge className="ml-auto shrink-0 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
             +{potentialGain} {t(r.pts, locale)}
           </Badge>
         </div>
@@ -139,9 +139,9 @@ export function ResumeTab({ result, role }: ResumeTabProps) {
               {improved_resume.changes_made.map((change, i) => (
                 <div
                   key={i}
-                  className="flex items-start gap-2 rounded-lg border border-l-4 border-l-green-500 p-3"
+                  className="flex items-start gap-2 rounded-lg border border-l-4 border-l-blue-500 p-3"
                 >
-                  <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+                  <ArrowRight className="mt-0.5 h-4 w-4 shrink-0 text-blue-500" />
                   <p className="text-sm">{change}</p>
                 </div>
               ))}
@@ -161,7 +161,7 @@ export function ResumeTab({ result, role }: ResumeTabProps) {
               {improved_resume.keywords_added.map((kw, i) => (
                 <Badge
                   key={i}
-                  className="bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                  className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
                 >
                   <Plus className="mr-1 h-3 w-3" />
                   {kw}

@@ -124,7 +124,7 @@ export function CekCVIndividual() {
                 onClick={() => fileRef.current?.click()}
                 className={`flex cursor-pointer flex-col items-center gap-3 rounded-xl border-2 border-dashed p-8 transition-colors ${
                   dragActive
-                    ? "border-green-500 bg-green-50 dark:bg-green-950/20"
+                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950/20"
                     : "border-muted-foreground/25 hover:border-muted-foreground/50 hover:bg-muted/30"
                 }`}
               >

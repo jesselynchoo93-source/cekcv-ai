@@ -67,14 +67,14 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.708 0 0);
-  /* CekCV brand */
-  --cekcv-brand-from: oklch(0.696 0.17 162.48);
-  --cekcv-brand-to: oklch(0.600 0.118 184.704);
-  --cekcv-brand-glow: oklch(0.696 0.17 162.48 / 25%);
+  /* CekCV brand — professional blue */
+  --cekcv-brand-from: oklch(0.623 0.214 259);
+  --cekcv-brand-to: oklch(0.511 0.262 276);
+  --cekcv-brand-glow: oklch(0.623 0.214 259 / 25%);
   --cekcv-glass-bg: oklch(1 0 0 / 60%);
   --cekcv-glass-border: oklch(0.922 0 0 / 60%);
   --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-2: oklch(0.623 0.214 259);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
@@ -108,11 +108,11 @@
   --input: oklch(1 0 0 / 18%);
   --ring: oklch(0.556 0 0);
   /* CekCV brand (dark) — boosted for visibility */
-  --cekcv-brand-glow: oklch(0.696 0.17 162.48 / 25%);
-  --cekcv-glass-bg: oklch(0.22 0.012 165 / 70%);
-  --cekcv-glass-border: oklch(0.696 0.06 162 / 20%);
+  --cekcv-brand-glow: oklch(0.623 0.214 259 / 25%);
+  --cekcv-glass-bg: oklch(0.22 0.012 260 / 70%);
+  --cekcv-glass-border: oklch(0.623 0.06 259 / 20%);
   --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-2: oklch(0.623 0.214 259);
   --chart-3: oklch(0.769 0.188 70.08);
   --chart-4: oklch(0.627 0.265 303.9);
   --chart-5: oklch(0.645 0.246 16.439);
@@ -140,13 +140,18 @@
     box-shadow: 0 0 0 0 var(--cekcv-brand-glow);
   }
   50% {
-    box-shadow: 0 0 0 8px oklch(0.696 0.17 162.48 / 0%);
+    box-shadow: 0 0 0 8px oklch(0.623 0.214 259 / 0%);
   }
 }
 
 @keyframes cekcv-shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes shimmer-slide {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(400%); }
 }
 
 /* CekCV brand utilities */
@@ -166,20 +171,20 @@
 
 /* Dark mode: lift inner panels so they're visible against the dark glass card */
 .dark .cekcv-glass .bg-background\/60 {
-  background: oklch(0.24 0.01 165 / 80%);
+  background: oklch(0.24 0.01 260 / 80%);
   border-color: oklch(1 0 0 / 12%);
 }
 .dark .cekcv-glass .bg-background\/80 {
-  background: oklch(0.26 0.012 165 / 85%);
+  background: oklch(0.26 0.012 260 / 85%);
   border-color: oklch(1 0 0 / 14%);
 }
 
 /* Dark mode: boost muted backgrounds inside progress/results cards */
 .dark .bg-muted\/30 {
-  background: oklch(0.28 0.008 165 / 40%);
+  background: oklch(0.28 0.008 260 / 40%);
 }
 .dark .bg-muted\/40 {
-  background: oklch(0.30 0.008 165 / 45%);
+  background: oklch(0.30 0.008 260 / 45%);
 }
 
 .cekcv-gradient-text {
@@ -192,7 +197,7 @@
 /* Hero background — premium mesh gradient with noise grain */
 .cekcv-hero-bg {
   position: relative;
-  background: oklch(0.985 0.008 160);
+  background: oklch(0.985 0.008 255);
 }
 /* Positioned elliptical orbs — low chroma, high lightness (pastel, not tinted) */
 .cekcv-hero-bg::before {
@@ -201,9 +206,9 @@
   inset: 0;
   z-index: 0;
   background:
-    radial-gradient(ellipse 80% 50% at 25% 0%, oklch(0.94 0.045 155), transparent),
-    radial-gradient(ellipse 55% 45% at 85% 15%, oklch(0.96 0.03 185), transparent),
-    radial-gradient(ellipse 65% 40% at 50% 95%, oklch(0.975 0.015 200), transparent);
+    radial-gradient(ellipse 80% 50% at 25% 0%, oklch(0.94 0.045 255), transparent),
+    radial-gradient(ellipse 55% 45% at 85% 15%, oklch(0.96 0.03 270), transparent),
+    radial-gradient(ellipse 65% 40% at 50% 95%, oklch(0.975 0.015 245), transparent);
   mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
 }
@@ -223,13 +228,13 @@
 }
 /* Dark mode hero */
 .dark .cekcv-hero-bg {
-  background: oklch(0.16 0.015 160);
+  background: oklch(0.16 0.015 260);
 }
 .dark .cekcv-hero-bg::before {
   background:
-    radial-gradient(ellipse 80% 50% at 25% 0%, oklch(0.22 0.04 160), transparent),
-    radial-gradient(ellipse 55% 45% at 85% 15%, oklch(0.2 0.03 185), transparent),
-    radial-gradient(ellipse 65% 40% at 50% 95%, oklch(0.17 0.01 200), transparent);
+    radial-gradient(ellipse 80% 50% at 25% 0%, oklch(0.22 0.04 255), transparent),
+    radial-gradient(ellipse 55% 45% at 85% 15%, oklch(0.2 0.03 270), transparent),
+    radial-gradient(ellipse 65% 40% at 50% 95%, oklch(0.17 0.01 245), transparent);
 }
 .dark .cekcv-hero-bg::after {
   opacity: 0.15;
@@ -239,9 +244,9 @@
   background: linear-gradient(
     90deg,
     var(--cekcv-brand-from) 0%,
-    oklch(0.66 0.145 172) 35%,
-    oklch(0.72 0.13 168) 50%,
-    oklch(0.66 0.145 172) 65%,
+    oklch(0.66 0.19 265) 35%,
+    oklch(0.72 0.16 260) 50%,
+    oklch(0.66 0.19 265) 65%,
     var(--cekcv-brand-from) 100%
   );
   background-size: 200% 100%;

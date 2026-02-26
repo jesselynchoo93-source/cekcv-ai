@@ -290,13 +290,13 @@ export default function Dashboard() {
       </section>
 
       {/* Get Started — only show the card for the active mode */}
-      <section className="border-t bg-gradient-to-b from-green-50/40 to-background dark:from-green-950/10 dark:to-background" ref={getStartedRef}>
+      <section className="border-t bg-gradient-to-b from-blue-50/40 to-background dark:from-blue-950/10 dark:to-background" ref={getStartedRef}>
         <div className="mx-auto max-w-3xl px-6 py-16">
           <h2 className="text-center text-2xl font-bold sm:text-3xl">{t(l.getStarted, locale)}</h2>
           <div className="mt-8">
             {isIndividual ? (
               <Link href="/apps/cekcv-individual">
-                <div className="group rounded-2xl border-2 border-green-500/30 bg-gradient-to-br from-green-50/80 to-teal-50/50 p-6 transition-all hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 dark:from-green-950/30 dark:to-teal-950/20 dark:hover:shadow-green-500/5">
+                <div className="group rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 p-6 transition-all hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 dark:from-blue-950/30 dark:to-indigo-950/20 dark:hover:shadow-blue-500/5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">
@@ -321,7 +321,7 @@ export default function Dashboard() {
               </Link>
             ) : (
               <Link href="/apps/cekcv-company">
-                <div className="group rounded-2xl border-2 border-green-500/30 bg-gradient-to-br from-green-50/80 to-teal-50/50 p-6 transition-all hover:border-green-500/50 hover:shadow-lg hover:shadow-green-500/10 dark:from-green-950/30 dark:to-teal-950/20 dark:hover:shadow-green-500/5">
+                <div className="group rounded-2xl border-2 border-blue-500/30 bg-gradient-to-br from-blue-50/80 to-indigo-50/50 p-6 transition-all hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 dark:from-blue-950/30 dark:to-indigo-950/20 dark:hover:shadow-blue-500/5">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <div className="flex h-10 w-10 items-center justify-center rounded-xl cekcv-gradient text-white">

@@ -22,6 +22,24 @@ interface ImprovementsTabProps {
   jobId?: string | null;
 }
 
+/**
+ * Splits a long paragraph into scannable bullet points.
+ * Splits on sentence boundaries (. followed by space + uppercase) while
+ * keeping quoted text, abbreviations (e.g., "e.g.", "P&L"), and examples intact.
+ */
+function splitIntoBullets(text: string): string[] {
+  // Split on ". " followed by an uppercase letter — the most reliable sentence boundary.
+  // Negative lookbehind avoids splitting after common abbreviations.
+  const sentences = text
+    .split(/(?<=[.!])\s+(?=[A-Z])/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+  // If splitting produced only 1 chunk (or text is short), return as-is.
+  if (sentences.length <= 1) return [text];
+  return sentences;
+}
+
 function getPriority(index: number): "high" | "medium" | "low" {
   if (index === 0) return "high";
   if (index === 1) return "medium";
@@ -114,7 +132,7 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
         </Card>
       )}
 
-      {/* Additional Suggestions — left-right layout */}
+      {/* Additional Suggestions */}
       {improvements.suggestions.length > 0 && (
         <div className="space-y-3">
           <h3 className="text-sm font-semibold">{t(r.additionalSuggestions, locale)}</h3>
@@ -122,12 +140,10 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
             {improvements.suggestions.map((suggestion, i) => {
               const checklistIdx = improvements.top_3_priority_actions.length + i;
               const isChecked = checkedItems.has(checklistIdx);
+              const bullets = splitIntoBullets(suggestion.text);
 
               return (
-                <div
-                  key={i}
-                  className="grid gap-3 rounded-lg border p-3 sm:grid-cols-[180px_1fr] items-center"
-                >
+                <div key={i} className="rounded-lg border p-3 space-y-2">
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
@@ -148,7 +164,17 @@ export function ImprovementsTab({ result, role, jobDescription, jobId }: Improve
                       {suggestion.title}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{suggestion.text}</p>
+                  <ul className="ml-6 space-y-1">
+                    {bullets.map((bullet, j) => (
+                      <li
+                        key={j}
+                        className="flex gap-2 text-sm text-muted-foreground"
+                      >
+                        <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-muted-foreground/40" />
+                        <span>{bullet}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               );
             })}

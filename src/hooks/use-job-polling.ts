@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { StatusResponse } from "@/lib/n8n";
 
-const POLL_INTERVAL = 5000;
+const POLL_INTERVAL = 4000;
 const FETCH_TIMEOUT = 15000; // Abort slow polls after 15s so they don't block subsequent polls
 const MAX_ERRORS = 5;
 const MAX_POLL_DURATION = 10 * 60 * 1000; // 10 minutes

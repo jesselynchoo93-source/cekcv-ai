@@ -11,6 +11,7 @@ import { useLanguage } from "@/contexts/language-context";
 import { translations, t } from "@/lib/translations";
 import { useAnimatedCounter } from "@/hooks/use-animated-counter";
 import { ConfettiTrigger } from "./ui/confetti-trigger";
+import { AtsGuide } from "./ui/ats-guide";
 import type { CekCVResult } from "./types";
 
 /** Capitalise "JESSELYN HASNAH" → "Jesselyn Hasnah" */
@@ -96,19 +97,25 @@ export function ResultsHeader({ result }: ResultsHeaderProps) {
         {/* Bottom row: ATS status + contact */}
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t border-border/50 pt-4">
           {current_assessment.status && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div className="flex cursor-default items-center gap-1.5">
-                  <span className="text-xs font-medium text-muted-foreground">ATS:</span>
-                  <Badge variant={score >= 70 ? "default" : "secondary"}>
-                    {current_assessment.status}
-                  </Badge>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent side="bottom" className="max-w-xs">
-                <p className="text-xs">{t(r[getAtsTooltipKey(current_assessment.status, score)], locale)}</p>
-              </TooltipContent>
-            </Tooltip>
+            <div className="flex items-center gap-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="flex cursor-default items-center gap-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">ATS:</span>
+                    <Badge variant={score >= 70 ? "default" : "secondary"}>
+                      {current_assessment.status}
+                    </Badge>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="max-w-xs">
+                  <p className="text-xs">{t(r[getAtsTooltipKey(current_assessment.status, score)], locale)}</p>
+                </TooltipContent>
+              </Tooltip>
+              <AtsGuide
+                currentScore={score}
+                potentialScore={score_projection.estimated_improved_score}
+              />
+            </div>
           )}
           <p className="text-xs text-muted-foreground">
             {[candidate.email, candidate.phone].filter(Boolean).join(" · ")}

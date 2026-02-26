@@ -1,17 +1,18 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { Search, Loader2, Clock, ExternalLink } from "lucide-react";
+import { useState, useCallback, useEffect } from "react";
+import { Loader2, Clock, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/language-context";
 import { translations, t } from "@/lib/translations";
 import { JobCard } from "../ui/job-card";
-import type { CekCVResult, JobMatch } from "../types";
+import type { CekCVResult } from "../types";
+import type { JobSearchState } from "../hooks/use-auto-job-search";
 
 interface JobsTabProps {
   result: CekCVResult;
   role: string;
-  jobId?: string | null;
+  jobSearch: JobSearchState;
 }
 
 function LinkedInIcon({ className }: { className?: string }) {
@@ -22,75 +23,76 @@ function LinkedInIcon({ className }: { className?: string }) {
   );
 }
 
-export function JobsTab({ result, role, jobId }: JobsTabProps) {
+function JobSearchTips() {
+  const { locale } = useLanguage();
+  const tips = translations.jobTips;
+  const [index, setIndex] = useState(0);
+  const [fading, setFading] = useState(false);
+
+  useEffect(() => {
+    const interval = setInterval(() => setFading(true), 6000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleTransitionEnd = useCallback(() => {
+    if (fading) {
+      setIndex((prev) => (prev + 1) % tips.length);
+      setFading(false);
+    }
+  }, [fading, tips.length]);
+
+  return (
+    <div className="flex items-start gap-2 rounded-lg bg-muted/50 px-4 py-3">
+      <Lightbulb className="mt-0.5 h-4 w-4 shrink-0 text-yellow-500" />
+      <p
+        className={`text-sm text-muted-foreground transition-opacity duration-300 ${
+          fading ? "opacity-0" : "opacity-100"
+        }`}
+        onTransitionEnd={handleTransitionEnd}
+      >
+        {tips[index][locale]}
+      </p>
+    </div>
+  );
+}
+
+export function JobsTab({ result, role, jobSearch }: JobsTabProps) {
   const { recommended_jobs } = result;
   const { locale } = useLanguage();
   const r = translations.results;
 
-  const [searchedJobs, setSearchedJobs] = useState<JobMatch[] | null>(null);
-  const [searching, setSearching] = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
+  const { searchedJobs, searching, searchError, retry } = jobSearch;
 
   const baseJobs = Array.isArray(recommended_jobs?.jobs) ? recommended_jobs.jobs : [];
   const jobList = searchedJobs ?? baseJobs;
   const hasMatchScores = jobList.some((j) => j.match_score != null);
 
-  const searchQuery = recommended_jobs?.search_query || role;
-  const searchLocation = recommended_jobs?.search_location || "";
-
-  const handleSearch = useCallback(async () => {
-    if (!jobId) {
-      setSearchError("No job ID available for search");
-      return;
-    }
-    setSearching(true);
-    setSearchError(null);
-    try {
-      const res = await fetch("/api/cekcv/search-jobs", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ jobId }),
-      });
-      const data = await res.json();
-      if (!data.success) {
-        setSearchError(data.error || "Search failed");
-        return;
-      }
-      const jobs = Array.isArray(data.jobs) ? data.jobs : [];
-      if (jobs.length === 0) {
-        setSearchError("No jobs found. Try again later.");
-        return;
-      }
-      setSearchedJobs(jobs);
-    } catch {
-      setSearchError("Failed to connect to job search");
-    } finally {
-      setSearching(false);
-    }
-  }, [jobId]);
-
   return (
     <div className="space-y-4">
       {/* Header */}
-      <p className="text-muted-foreground">
-        {t(r.similarRoles, locale)}
-      </p>
+      <div>
+        <p className="text-muted-foreground">
+          {t(r.similarRoles, locale)}
+        </p>
+        {jobList.length > 0 && (
+          <p className="mt-1 text-sm text-muted-foreground/60">
+            {t(r.similarRolesDesc, locale)}
+          </p>
+        )}
+      </div>
 
       {/* Search info + match quality summary */}
       {jobList.length > 0 && (
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
           <span className="flex items-center gap-1.5">
-            <Search className="h-4 w-4" />
+            <LinkedInIcon className="h-3.5 w-3.5 text-[#0A66C2]" />
             {t(r.foundJobs, locale).replace("{count}", String(jobList.length))}
-            {(recommended_jobs.search_query || (searchedJobs && searchQuery)) && (
-              <> {t(r.forQuery, locale)} &ldquo;{recommended_jobs.search_query || searchQuery}&rdquo;</>
-            )}
           </span>
 
           {hasMatchScores && (
             <div className="flex items-center gap-3 text-xs">
               <span className="flex items-center gap-1">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
+                <span className="h-2 w-2 rounded-full bg-blue-500" />
                 {jobList.filter((j) => (j.match_score || 0) >= 80).length} {t(r.strong, locale)}
               </span>
               <span className="flex items-center gap-1">
@@ -106,92 +108,74 @@ export function JobsTab({ result, role, jobId }: JobsTabProps) {
         </div>
       )}
 
-      {/* Job cards */}
+      {/* Job list */}
       {jobList.length > 0 && (
-        <div className="space-y-3">
+        <div className="space-y-1.5">
           {jobList.map((job, i) => (
             <JobCard key={i} job={job} index={i} />
           ))}
         </div>
       )}
 
-      {/* Empty state — encouraging CTA with LinkedIn branding */}
-      {jobList.length === 0 && !searching && (
-        <div className="rounded-2xl border bg-gradient-to-br from-[#0A66C2]/5 to-transparent p-6 sm:p-8">
-          <div className="flex flex-col items-center gap-5 text-center">
-            {/* LinkedIn logo circle */}
-            <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0A66C2]/10">
-              <LinkedInIcon className="h-8 w-8 text-[#0A66C2]" />
-            </div>
-
-            {/* Headline */}
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">
-                {t(r.jobSearchCta, locale)}
-              </h3>
-              <p className="mx-auto max-w-md text-sm text-muted-foreground">
-                {t(r.jobSearchCtaDesc, locale)}
-              </p>
-            </div>
-
-            {/* Search keywords preview */}
-            {searchQuery && (
-              <div className="flex flex-wrap items-center justify-center gap-2">
-                <span className="text-xs text-muted-foreground/60">{t(r.searchFor, locale)}:</span>
-                <span className="rounded-full bg-[#0A66C2]/10 px-3 py-1 text-xs font-medium text-[#0A66C2]">
-                  {searchQuery}
-                </span>
-                {searchLocation && (
-                  <span className="rounded-full bg-muted px-3 py-1 text-xs text-muted-foreground">
-                    {searchLocation}
-                  </span>
-                )}
+      {/* Searching state */}
+      {jobList.length === 0 && searching && (
+        <div className="mx-auto max-w-lg py-6">
+          <div className="overflow-hidden rounded-xl border">
+            {/* Card header — LinkedIn branded */}
+            <div className="flex items-center gap-3 border-b bg-muted/20 px-5 py-4">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#0A66C2]">
+                <LinkedInIcon className="h-5 w-5 text-white" />
               </div>
-            )}
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold leading-tight">{t(r.findingJobs, locale)}</p>
+                <p className="text-sm text-muted-foreground">
+                  {t(r.jobSearchNote, locale)}
+                </p>
+              </div>
+              <Loader2 className="h-5 w-5 shrink-0 animate-spin text-[#0A66C2]" />
+            </div>
 
-            {/* Error message */}
-            {searchError && (
-              <p className="text-sm text-destructive">{searchError}</p>
-            )}
+            {/* Animated progress bar */}
+            <div className="h-1 w-full overflow-hidden bg-[#0A66C2]/10">
+              <div className="h-full w-1/4 animate-[shimmer-slide_1.8s_ease-in-out_infinite] rounded-full bg-[#0A66C2]/50" />
+            </div>
 
-            {/* CTA Button */}
-            <Button
-              onClick={handleSearch}
-              size="lg"
-              className="gap-2.5 bg-[#0A66C2] text-white hover:bg-[#004182]"
-            >
-              <LinkedInIcon className="h-4 w-4" />
-              {t(r.searchJobsBtn, locale)}
-              <ExternalLink className="h-3.5 w-3.5 opacity-60" />
-            </Button>
-
-            {/* Time note */}
-            <p className="flex items-center gap-1.5 text-xs text-muted-foreground/60">
-              <Clock className="h-3 w-3" />
-              {t(r.jobSearchNote, locale)}
-            </p>
+            {/* Card body */}
+            <div className="px-5 py-4">
+              <JobSearchTips />
+            </div>
           </div>
         </div>
       )}
 
-      {/* Loading state */}
-      {searching && (
-        <div className="rounded-2xl border bg-gradient-to-br from-[#0A66C2]/5 to-transparent p-6 sm:p-8">
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="relative">
-              <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-[#0A66C2]/10">
-                <LinkedInIcon className="h-8 w-8 text-[#0A66C2]" />
-              </div>
-              <div className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-background shadow-sm">
-                <Loader2 className="h-4 w-4 animate-spin text-[#0A66C2]" />
-              </div>
-            </div>
-            <div>
-              <p className="font-medium">{t(r.findingJobs, locale)}</p>
-              <p className="mt-1 text-xs text-muted-foreground/60">
-                {t(r.jobSearchNote, locale)}
-              </p>
-            </div>
+      {/* Error / retry state */}
+      {jobList.length === 0 && !searching && (
+        <div className="py-8">
+          <div className="mx-auto max-w-sm space-y-5 text-center">
+            <p className="text-lg font-semibold">
+              {t(r.jobSearchCta, locale)}
+            </p>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              {t(r.jobSearchCtaDesc, locale)}
+            </p>
+
+            {searchError && (
+              <p className="text-sm text-destructive">{searchError}</p>
+            )}
+
+            <Button
+              onClick={retry}
+              size="lg"
+              className="cekcv-gradient text-white hover:opacity-90"
+            >
+              <LinkedInIcon className="mr-2 h-4 w-4" />
+              {t(r.searchJobsBtn, locale)}
+            </Button>
+
+            <p className="flex items-center justify-center gap-1.5 text-xs text-muted-foreground/50">
+              <Clock className="h-3 w-3" />
+              {t(r.jobSearchNote, locale)}
+            </p>
           </div>
         </div>
       )}

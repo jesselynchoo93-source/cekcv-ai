@@ -25,8 +25,8 @@ export function CekCVLogo({
     >
       <defs>
         <linearGradient id="cekcv-g" x1="0" y1="0" x2="40" y2="40" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#34d399" />
-          <stop offset="1" stopColor="#14b8a6" />
+          <stop stopColor="#3b82f6" />
+          <stop offset="1" stopColor="#6366f1" />
         </linearGradient>
       </defs>
       {/* Rounded square background */}
