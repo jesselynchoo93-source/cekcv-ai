@@ -18,7 +18,6 @@ import {
   ChevronDown,
   ChevronUp,
   Check,
-  Link2,
   MessageCircle,
   Trophy,
   FileText,
@@ -82,6 +81,35 @@ interface BatchInsights {
 type SortField = "score" | "name" | "status" | "must_match_pct";
 type SortDir = "asc" | "desc";
 type StatusFilter = "all" | "shortlist" | "review" | "reject";
+
+// ── Name sanitization (detect LLM placeholder names) ──
+
+const PLACEHOLDER_NAME_PATTERNS = [
+  /^data\s+tidak/i,
+  /^tidak\s+tersedia/i,
+  /^\[.*kandidat.*\]$/i,
+  /^\[.*candidate.*\]$/i,
+  /^\[.*nama.*\]$/i,
+  /^\[.*name.*\]$/i,
+  /^n\/a$/i,
+  /^unknown$/i,
+  /^not\s+available/i,
+  /^tidak\s+diketahui/i,
+];
+
+function isPlaceholderName(name: string): boolean {
+  if (!name || name.trim().length === 0) return true;
+  return PLACEHOLDER_NAME_PATTERNS.some((p) => p.test(name.trim()));
+}
+
+function cleanCandidateName(name: string, fileName?: string, rank?: number): string {
+  if (!isPlaceholderName(name)) return name;
+  if (fileName) {
+    const base = fileName.replace(/\.[^.]+$/, "").replace(/[_-]/g, " ").replace(/\s+/g, " ").trim();
+    if (base.length > 2) return base;
+  }
+  return rank ? `Candidate ${rank}` : "";
+}
 
 // ── Helpers ──
 
@@ -313,7 +341,7 @@ function CandidateRow({
   onToggleCompare: () => void;
   onStatusChange: (newStatus: string) => void;
 }) {
-  const name = c.name || `Candidate ${rank}`;
+  const name = cleanCandidateName(c.name, c.fileName, rank);
 
   return (
     <div
@@ -322,9 +350,12 @@ function CandidateRow({
       } ${isComparing ? "ring-2 ring-blue-500/40" : ""}`}
     >
       {/* Main row — clickable */}
-      <button
+      <div
+        role="button"
+        tabIndex={0}
         onClick={onToggleExpand}
-        className="flex w-full items-center gap-2 p-3 text-left transition-colors sm:gap-3 sm:p-4"
+        onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onToggleExpand(); } }}
+        className="flex w-full items-center gap-2 p-3 text-left transition-colors cursor-pointer sm:gap-3 sm:p-4"
       >
         {/* Compare checkbox */}
         <div
@@ -387,7 +418,7 @@ function CandidateRow({
 
         {/* Expand indicator */}
         <ChevronRight className={`h-4 w-4 shrink-0 text-muted-foreground/50 transition-transform ${isExpanded ? "rotate-90" : ""}`} />
-      </button>
+      </div>
     </div>
   );
 }
@@ -457,7 +488,7 @@ function CandidateDetail({
   locale: "en" | "id";
 }) {
   const f = translations.companyForm;
-  const name = c.name || `Candidate ${rank}`;
+  const name = cleanCandidateName(c.name, c.fileName, rank);
   const resume = c.resume || {};
   const weights = c.weights || {};
   const hasWeights = Object.keys(weights).length > 0;
@@ -600,7 +631,7 @@ function CandidateDetail({
                   </button>
                 </div>
               )}
-              {c.phone && (
+              {c.phone && !c.phone.startsWith("#ERROR") && (
                 <div className="flex items-center gap-2">
                   <Phone className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
                   <span className="flex-1 text-sm">{c.phone.replace(/^'/, "")}</span>
@@ -750,7 +781,7 @@ function CompareView({
       {/* Comparison grid */}
       <div className={`grid gap-4 ${candidates.length === 2 ? "sm:grid-cols-2" : "sm:grid-cols-3"}`}>
         {candidates.map((c, i) => {
-          const name = c.name || `Candidate ${i + 1}`;
+          const name = cleanCandidateName(c.name, c.fileName, i + 1);
           const resume = c.resume || {};
           const uniqueSkills = allSkillSets[i] ? [...allSkillSets[i]].filter((s) => !sharedSkills.includes(s)).slice(0, 5) : [];
           return (
@@ -874,12 +905,10 @@ export function CompanyDashboard({
   result,
   onReset,
   roleName,
-  batchId,
 }: {
   result: Record<string, unknown>;
   onReset: () => void;
   roleName?: string;
-  batchId?: string;
 }) {
   const { locale } = useLanguage();
   const f = translations.companyForm;
@@ -900,7 +929,6 @@ export function CompanyDashboard({
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
   const [compareSet, setCompareSet] = useState<Set<number>>(new Set());
   const [showCompare, setShowCompare] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [localStatuses, setLocalStatuses] = useState<Record<number, string>>({});
 
   const getCandidateStatus = useCallback((idx: number) => localStatuses[idx] || candidates[idx]?.status || "review", [localStatuses, candidates]);
@@ -938,15 +966,8 @@ export function CompanyDashboard({
     });
   };
 
-  const copyShareLink = () => {
-    if (!batchId) return;
-    const url = `${window.location.origin}${window.location.pathname}?batch=${batchId}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
 
-  const role = roleName || (locale === "en" ? "Open Role" : "Posisi Terbuka");
+  const role = roleName || (result.roleName as string) || (locale === "en" ? "Open Role" : "Posisi Terbuka");
 
   const statusCounts = useMemo(() => {
     const counts = { all: candidates.length, shortlist: 0, review: 0, reject: 0 };
@@ -979,12 +1000,6 @@ export function CompanyDashboard({
             <Button size="sm" onClick={() => setShowCompare(true)} className="cekcv-gradient text-white">
               <Columns3 className="mr-1.5 h-3.5 w-3.5" />
               {t(f.compare, locale)} ({compareSet.size})
-            </Button>
-          )}
-          {batchId && (
-            <Button variant="outline" size="sm" onClick={copyShareLink}>
-              {copied ? <Check className="mr-1.5 h-3.5 w-3.5" /> : <Link2 className="mr-1.5 h-3.5 w-3.5" />}
-              {copied ? t(f.copied, locale) : t(f.share, locale)}
             </Button>
           )}
           <Button variant="outline" size="sm" onClick={() => { downloadFile(generateCSV(filtered), `screening-${role.replace(/\s+/g, "-")}.csv`, "text/csv"); }}>

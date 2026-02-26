@@ -24,6 +24,7 @@ import {
   LayoutList,
   Scale,
   FilePlus2,
+  Eye,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/apps/cekcv-individual/ui/theme-toggle";
 import { LanguageToggle } from "@/components/apps/cekcv-individual/ui/language-toggle";
@@ -152,9 +153,25 @@ export default function Dashboard() {
         <div className="relative z-10 mx-auto max-w-5xl px-6 py-16 sm:py-24">
           <div className="mx-auto max-w-2xl text-center">
 
-            <Badge variant="outline" className="mb-4">
-              {t(l.badge, locale)}
-            </Badge>
+            {/* Powered by 3 AI models — with logos */}
+            <div className="mb-6 inline-flex items-center gap-3 rounded-full border bg-background/80 px-5 py-2.5 shadow-sm backdrop-blur">
+              <span className="text-sm font-medium text-muted-foreground">{t(l.badge, locale)}</span>
+              <div className="h-4 w-px bg-border" />
+              <div className="flex items-center gap-2.5">
+                {/* OpenAI */}
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+                </svg>
+                {/* Anthropic */}
+                <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13.827 3.52h3.603L24 20.48h-3.603l-6.57-16.96zm-7.258 0h3.767L16.906 20.48h-3.674l-1.343-3.461H5.017l-1.344 3.46H0l6.57-16.96zm2.327 5.15L6.27 14.981h5.252L8.896 8.67z"/>
+                </svg>
+                {/* Google — optically smaller to match the others */}
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+                </svg>
+              </div>
+            </div>
             <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
               {headline}{" "}
               <span className="cekcv-gradient-text">{highlight}</span>{" "}
@@ -208,8 +225,57 @@ export default function Dashboard() {
         </div>
       </section>
 
-      {/* Features */}
+      {/* Why 3 AI Models — dedicated section */}
       <section className="border-t">
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <h2 className="text-center text-2xl font-bold sm:text-3xl">{t(l.whyTitle, locale)}</h2>
+          <p className="mx-auto mt-2 max-w-2xl text-center text-base text-muted-foreground">
+            {t(l.whySubtitle, locale)}
+          </p>
+
+          <div className="mt-10 grid gap-6 sm:grid-cols-3">
+            {/* GPT */}
+            <div className="rounded-xl border bg-card p-5 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#10a37f]/10">
+                <svg className="h-6 w-6 text-[#10a37f]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M22.282 9.821a5.985 5.985 0 0 0-.516-4.91 6.046 6.046 0 0 0-6.51-2.9A6.065 6.065 0 0 0 4.981 4.18a5.985 5.985 0 0 0-3.998 2.9 6.046 6.046 0 0 0 .743 7.097 5.98 5.98 0 0 0 .51 4.911 6.051 6.051 0 0 0 6.515 2.9A5.985 5.985 0 0 0 13.26 24a6.056 6.056 0 0 0 5.772-4.206 5.99 5.99 0 0 0 3.997-2.9 6.056 6.056 0 0 0-.747-7.073zM13.26 22.43a4.476 4.476 0 0 1-2.876-1.04l.141-.081 4.779-2.758a.795.795 0 0 0 .392-.681v-6.737l2.02 1.168a.071.071 0 0 1 .038.052v5.583a4.504 4.504 0 0 1-4.494 4.494zM3.6 18.304a4.47 4.47 0 0 1-.535-3.014l.142.085 4.783 2.759a.771.771 0 0 0 .78 0l5.843-3.369v2.332a.08.08 0 0 1-.033.062L9.74 19.95a4.5 4.5 0 0 1-6.14-1.646zM2.34 7.896a4.485 4.485 0 0 1 2.366-1.973V11.6a.766.766 0 0 0 .388.676l5.815 3.355-2.02 1.168a.076.076 0 0 1-.071 0l-4.83-2.786A4.504 4.504 0 0 1 2.34 7.872zm16.597 3.855l-5.833-3.387L15.119 7.2a.076.076 0 0 1 .071 0l4.83 2.791a4.494 4.494 0 0 1-.676 8.105v-5.678a.79.79 0 0 0-.407-.667zm2.01-3.023l-.141-.085-4.774-2.782a.776.776 0 0 0-.785 0L9.409 9.23V6.897a.066.066 0 0 1 .028-.061l4.83-2.787a4.5 4.5 0 0 1 6.68 4.66zm-12.64 4.135l-2.02-1.164a.08.08 0 0 1-.038-.057V6.075a4.5 4.5 0 0 1 7.375-3.453l-.142.08L8.704 5.46a.795.795 0 0 0-.393.681zm1.097-2.365l2.602-1.5 2.607 1.5v2.999l-2.597 1.5-2.607-1.5z"/>
+                </svg>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold">{t(l.whyGptTitle, locale)}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t(l.whyGptDesc, locale)}</p>
+            </div>
+
+            {/* Claude */}
+            <div className="rounded-xl border bg-card p-5 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#d4a574]/10">
+                <svg className="h-6 w-6 text-[#d4a574]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M13.827 3.52h3.603L24 20.48h-3.603l-6.57-16.96zm-7.258 0h3.767L16.906 20.48h-3.674l-1.343-3.461H5.017l-1.344 3.46H0l6.57-16.96zm2.327 5.15L6.27 14.981h5.252L8.896 8.67z"/>
+                </svg>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold">{t(l.whyClaudeTitle, locale)}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t(l.whyClaudeDesc, locale)}</p>
+            </div>
+
+            {/* Gemini */}
+            <div className="rounded-xl border bg-card p-5 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[#4285F4]/10">
+                <svg className="h-6 w-6 text-[#4285F4]" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+                </svg>
+              </div>
+              <h3 className="mt-3 text-lg font-semibold">{t(l.whyGeminiTitle, locale)}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{t(l.whyGeminiDesc, locale)}</p>
+            </div>
+          </div>
+
+          <p className="mx-auto mt-8 max-w-lg rounded-lg border bg-muted/30 px-4 py-3 text-center text-sm font-medium text-muted-foreground">
+            {isIndividual ? t(l.whyConsensus, locale) : t(l.whyConsensusCompany, locale)}
+          </p>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="border-t bg-muted/20">
         <div className="mx-auto max-w-5xl px-6 py-16">
           <h2 className="text-center text-2xl font-bold sm:text-3xl">{t(l.featTitle, locale)}</h2>
           <p className="mt-2 text-center text-base text-muted-foreground">
@@ -232,6 +298,137 @@ export default function Dashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* See Sample Result */}
+      <section className="border-t">
+        <div className="mx-auto max-w-5xl px-6 py-16">
+          <div className="mx-auto max-w-2xl text-center">
+            <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border bg-muted/30 px-3 py-1 text-xs font-medium text-muted-foreground">
+              <Eye className="h-3.5 w-3.5" />
+              {locale === "en" ? "Preview" : "Pratinjau"}
+            </div>
+            <h2 className="text-2xl font-bold sm:text-3xl">
+              {locale === "en" ? "See what you'll get" : "Lihat apa yang kamu dapatkan"}
+            </h2>
+            <p className="mt-2 text-base text-muted-foreground">
+              {isIndividual
+                ? (locale === "en"
+                  ? "Here's a real analysis from CekCV. Your CV gets scored, gaps identified, an improved version generated, and matching jobs found — all in one go."
+                  : "Ini contoh analisis nyata dari CekCV. CV kamu dinilai, gap diidentifikasi, versi perbaikan dibuat, dan lowongan yang cocok ditemukan — semuanya sekaligus.")
+                : (locale === "en"
+                  ? "Here's what your screening dashboard looks like. Each candidate is ranked by AI consensus score with detailed breakdowns."
+                  : "Ini tampilan dashboard screening kamu. Setiap kandidat di-ranking berdasarkan skor konsensus AI dengan breakdown detail.")}
+            </p>
+          </div>
+
+          {/* Sample result mockup */}
+          <div className="mt-8 overflow-hidden rounded-xl border shadow-lg">
+            <div className="bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground flex items-center gap-2">
+              <div className="flex gap-1.5">
+                <div className="h-3 w-3 rounded-full bg-red-400" />
+                <div className="h-3 w-3 rounded-full bg-yellow-400" />
+                <div className="h-3 w-3 rounded-full bg-green-400" />
+              </div>
+              <span className="ml-2">cekcv.ai{isIndividual ? "/apps/cekcv-individual" : "/apps/cekcv-company"}</span>
+            </div>
+            {isIndividual ? (
+              <div className="bg-card p-6 sm:p-8">
+                {/* Mock individual result */}
+                <div className="flex items-start gap-4">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl cekcv-gradient text-2xl font-bold text-white">
+                    78
+                  </div>
+                  <div>
+                    <p className="text-lg font-semibold">{locale === "en" ? "Hi, Sarah!" : "Halo, Sarah!"}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {locale === "en"
+                        ? "Your CV scores 78/100 for the Senior Product Manager role"
+                        : "CV kamu mendapat skor 78/100 untuk posisi Senior Product Manager"}
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        {locale === "en" ? "Potential: 91" : "Potensi: 91"}
+                      </span>
+                      <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                        {locale === "en" ? "5 strengths found" : "5 kekuatan ditemukan"}
+                      </span>
+                      <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
+                        {locale === "en" ? "3 improvements" : "3 perbaikan"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="mt-6 grid gap-4 sm:grid-cols-4">
+                  {[
+                    { label: locale === "en" ? "ATS Score" : "Skor ATS", value: "78/100", color: "text-blue-600" },
+                    { label: locale === "en" ? "Missing Keywords" : "Keyword Kurang", value: "4", color: "text-amber-600" },
+                    { label: locale === "en" ? "Improved CV" : "CV Perbaikan", value: locale === "en" ? "Ready" : "Siap", color: "text-green-600" },
+                    { label: locale === "en" ? "Job Matches" : "Lowongan Cocok", value: "12", color: "text-purple-600" },
+                  ].map((item, i) => (
+                    <div key={i} className="rounded-lg border bg-muted/20 p-3 text-center">
+                      <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
+                      <p className="text-[11px] text-muted-foreground">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <div className="bg-card p-6 sm:p-8">
+                {/* Mock company result */}
+                <div>
+                  <p className="text-lg font-semibold">{locale === "en" ? "Screening Results" : "Hasil Screening"}</p>
+                  <p className="text-sm text-muted-foreground">
+                    Senior Product Manager | {locale === "en" ? "9 candidates screened by 3 AI models" : "9 kandidat discreening oleh 3 model AI"}
+                  </p>
+                </div>
+                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+                  {[
+                    { label: locale === "en" ? "Avg. Score" : "Rata-rata", value: "72", color: "text-blue-600" },
+                    { label: locale === "en" ? "Shortlisted" : "Shortlist", value: "6", color: "text-green-600" },
+                    { label: locale === "en" ? "Interview Ready" : "Siap Interview", value: "3", color: "text-purple-600" },
+                    { label: locale === "en" ? "Best Score" : "Skor Terbaik", value: "89", color: "text-blue-600" },
+                  ].map((item, i) => (
+                    <div key={i} className="rounded-lg border bg-muted/20 p-3 text-center">
+                      <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
+                      <p className="text-[11px] text-muted-foreground">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-4 space-y-2">
+                  {[
+                    { name: "Ahmad Rizky", score: 89, status: "shortlist" },
+                    { name: "Dinda Putri", score: 82, status: "shortlist" },
+                    { name: "Budi Santoso", score: 76, status: "shortlist" },
+                  ].map((c, i) => (
+                    <div key={i} className="flex items-center gap-3 rounded-lg border bg-muted/10 px-4 py-2.5">
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded cekcv-gradient text-xs font-bold text-white">{i + 1}</span>
+                      <span className="flex-1 text-sm font-medium">{c.name}</span>
+                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                        {locale === "en" ? "Shortlisted" : "Shortlist"}
+                      </span>
+                      <span className="text-lg font-bold text-blue-600">{c.score}</span>
+                    </div>
+                  ))}
+                  <p className="text-center text-xs text-muted-foreground">
+                    {locale === "en" ? "+6 more candidates..." : "+6 kandidat lagi..."}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          <div className="mt-6 flex justify-center">
+            <Button
+              size="lg"
+              className="cekcv-gradient text-white hover:opacity-90"
+              onClick={scrollToGetStarted}
+            >
+              <Sparkles className="mr-2 h-4 w-4" />
+              {isIndividual ? t(l.ctaAnalyze, locale) : t(l.ctaScreen, locale)}
+            </Button>
           </div>
         </div>
       </section>
@@ -350,17 +547,31 @@ export default function Dashboard() {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8 text-center">
-        <div className="flex items-center justify-center gap-2">
-          <CekCVLogo size="sm" />
-          <p className="text-sm font-medium">CekCV.Ai</p>
+      <footer className="border-t py-6">
+        <div className="mx-auto flex max-w-5xl flex-col items-center gap-2 px-6">
+          <div className="flex items-center gap-2">
+            <CekCVLogo size="sm" />
+            <span className="text-sm font-medium">CekCV.Ai</span>
+          </div>
+          <p className="text-xs text-muted-foreground">{t(l.footerTagline, locale)}</p>
+          {/* Built with n8n badge */}
+          <a
+            href="https://n8n.io"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-1 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 transition-colors hover:bg-muted/40"
+          >
+            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#ea4b71" xmlns="http://www.w3.org/2000/svg">
+              <path d="M21.4737 5.6842c-1.1772 0-2.1663.8051-2.4468 1.8947h-2.8955c-1.235 0-2.289.893-2.492 2.111l-.1038.623a1.263 1.263 0 0 1-1.246 1.0555H11.289c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947s-2.1663.8051-2.4467 1.8947H4.973c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947C1.1311 9.4737 0 10.6047 0 12s1.131 2.5263 2.5263 2.5263c1.1772 0 2.1663-.8051 2.4468-1.8947h1.4223c.2804 1.0896 1.2696 1.8947 2.4467 1.8947 1.1772 0 2.1663-.8051 2.4468-1.8947h1.0008a1.263 1.263 0 0 1 1.2459 1.0555l.1038.623c.203 1.218 1.257 2.111 2.492 2.111h.3692c.2804 1.0895 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263c-1.1772 0-2.1664.805-2.4468 1.8947h-.3692a1.263 1.263 0 0 1-1.246-1.0555l-.1037-.623A2.52 2.52 0 0 0 13.9607 12a2.52 2.52 0 0 0 .821-1.4794l.1038-.623a1.263 1.263 0 0 1 1.2459-1.0555h2.8955c.2805 1.0896 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263m0 1.2632a1.263 1.263 0 0 1 1.2631 1.2631 1.263 1.263 0 0 1-1.2631 1.2632 1.263 1.263 0 0 1-1.2632-1.2632 1.263 1.263 0 0 1 1.2632-1.2631M2.5263 10.7368A1.263 1.263 0 0 1 3.7895 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 1.2632 12a1.263 1.263 0 0 1 1.2631-1.2632m6.3158 0A1.263 1.263 0 0 1 10.1053 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 7.579 12a1.263 1.263 0 0 1 1.2632-1.2632m10.1053 3.7895a1.263 1.263 0 0 1 1.2631 1.2632 1.263 1.263 0 0 1-1.2631 1.2631 1.263 1.263 0 0 1-1.2632-1.2631 1.263 1.263 0 0 1 1.2632-1.2632"/>
+            </svg>
+            <span className="text-xs font-medium text-muted-foreground">
+              {locale === "en" ? "Built with n8n" : "Dibangun dengan n8n"}
+            </span>
+          </a>
+          <p className="mt-1 max-w-xl text-center text-[11px] leading-relaxed text-muted-foreground/50">
+            {t(l.disclaimer, locale)}
+          </p>
         </div>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {t(l.footerTagline, locale)}
-        </p>
-        <p className="mx-auto mt-4 max-w-xl text-[11px] leading-relaxed text-muted-foreground/50">
-          {t(l.disclaimer, locale)}
-        </p>
       </footer>
     </div>
   );

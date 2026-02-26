@@ -7,6 +7,8 @@ const POLL_INTERVAL = 4000;
 const FETCH_TIMEOUT = 15000; // Abort slow polls after 15s so they don't block subsequent polls
 const MAX_ERRORS = 5;
 const MAX_POLL_DURATION = 10 * 60 * 1000; // 10 minutes
+const INTERPOLATION_INTERVAL = 1000; // Smooth progress every second
+const INTERPOLATION_RATE = 0.4; // Add 0.4% per second when progress hasn't changed
 
 export function useJobPolling() {
   const [jobId, setJobId] = useState<string | null>(null);
@@ -14,12 +16,36 @@ export function useJobPolling() {
   const [polling, setPolling] = useState(false);
   const [pollError, setPollError] = useState<string | null>(null);
   const [stepDescriptions, setStepDescriptions] = useState<Record<string, string>>({});
+  const [displayProgress, setDisplayProgress] = useState(0);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxDurationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const interpolationRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const errorCountRef = useRef(0);
   const stoppedRef = useRef(false);
   const pollingRef = useRef(false);
+  const highWaterRef = useRef(0);
+  const realProgressRef = useRef(0);
+
+  const stopInterpolation = useCallback(() => {
+    if (interpolationRef.current) {
+      clearInterval(interpolationRef.current);
+      interpolationRef.current = null;
+    }
+  }, []);
+
+  const startInterpolation = useCallback(() => {
+    stopInterpolation();
+    interpolationRef.current = setInterval(() => {
+      setDisplayProgress((prev) => {
+        const real = realProgressRef.current;
+        // Don't interpolate past the next expected milestone or 99%
+        const cap = Math.min(real + 25, 99);
+        if (prev >= cap) return prev;
+        return Math.min(prev + INTERPOLATION_RATE, cap);
+      });
+    }, INTERPOLATION_INTERVAL);
+  }, [stopInterpolation]);
 
   const stop = useCallback(() => {
     stoppedRef.current = true;
@@ -36,8 +62,9 @@ export function useJobPolling() {
       clearTimeout(maxDurationRef.current);
       maxDurationRef.current = null;
     }
+    stopInterpolation();
     setPolling(false);
-  }, []);
+  }, [stopInterpolation]);
 
   const poll = useCallback(async (id: string) => {
     // Skip if already stopped or another poll is in-flight
@@ -70,6 +97,23 @@ export function useJobPolling() {
 
       errorCountRef.current = 0;
       const statusData = data as StatusResponse;
+
+      // Enforce monotonically increasing progress to prevent visual regression
+      // caused by n8n writing earlier-stage status for the next candidate in a batch
+      const incoming = statusData.progress ?? 0;
+      if (incoming < highWaterRef.current) {
+        statusData.progress = highWaterRef.current;
+      } else {
+        highWaterRef.current = incoming;
+      }
+
+      // Sync real progress for interpolation
+      realProgressRef.current = statusData.progress;
+      // Jump display to real progress when it catches up or exceeds
+      setDisplayProgress((prev) =>
+        statusData.progress > prev ? statusData.progress : prev
+      );
+
       setStatus(statusData);
 
       // Accumulate step descriptions as they arrive
@@ -107,16 +151,20 @@ export function useJobPolling() {
       setStepDescriptions({});
       setPolling(true);
       errorCountRef.current = 0;
+      highWaterRef.current = 0;
+      realProgressRef.current = 0;
+      setDisplayProgress(0);
       // Small delay before first poll to let Init Job Status write the row
       timeoutRef.current = setTimeout(() => poll(id), 1000);
       intervalRef.current = setInterval(() => poll(id), POLL_INTERVAL);
+      startInterpolation();
       // Safety timeout: stop polling after MAX_POLL_DURATION
       maxDurationRef.current = setTimeout(() => {
         stop();
         setPollError("Analysis timed out. Please try again.");
       }, MAX_POLL_DURATION);
     },
-    [poll, stop]
+    [poll, stop, startInterpolation]
   );
 
   const reset = useCallback(() => {
@@ -126,11 +174,14 @@ export function useJobPolling() {
     setPollError(null);
     setStepDescriptions({});
     errorCountRef.current = 0;
+    highWaterRef.current = 0;
+    realProgressRef.current = 0;
+    setDisplayProgress(0);
   }, [stop]);
 
   useEffect(() => {
     return () => stop();
   }, [stop]);
 
-  return { jobId, status, polling, pollError, stepDescriptions, start, reset };
+  return { jobId, status, polling, pollError, stepDescriptions, displayProgress, start, reset };
 }

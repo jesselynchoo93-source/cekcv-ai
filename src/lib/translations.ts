@@ -114,6 +114,83 @@ export const translations = {
     companyTrustBatch: { en: "Process up to 50 CVs", id: "Proses hingga 50 CV" },
     companyTrustFair: { en: "Fair & unbiased scoring", id: "Penilaian adil & tanpa bias" },
 
+    // Why 3 AI models
+    whyTitle: { en: "Why 3 AI models?", id: "Kenapa 3 model AI?" },
+    whySubtitle: {
+      en: "Each AI has blind spots. By combining GPT, Claude & Gemini, we reduce bias and catch what a single model misses.",
+      id: "Setiap AI punya titik buta. Dengan menggabungkan GPT, Claude & Gemini, kami mengurangi bias dan menangkap apa yang terlewat oleh satu model saja.",
+    },
+    whyGptTitle: { en: "GPT-4o", id: "GPT-4o" },
+    whyGptDesc: {
+      en: "Strong at understanding context, job requirements, and nuanced language in CVs",
+      id: "Kuat dalam memahami konteks, persyaratan kerja, dan nuansa bahasa dalam CV",
+    },
+    whyClaudeTitle: { en: "Claude Sonnet", id: "Claude Sonnet" },
+    whyClaudeDesc: {
+      en: "Excels at structured analysis, careful reasoning, and identifying subtle skill gaps",
+      id: "Unggul dalam analisis terstruktur, penalaran cermat, dan mengidentifikasi skill gap yang halus",
+    },
+    whyGeminiTitle: { en: "Gemini Pro", id: "Gemini Pro" },
+    whyGeminiDesc: {
+      en: "Great at cross-referencing data, multilingual CVs, and pattern recognition",
+      id: "Hebat dalam cross-referencing data, CV multibahasa, dan pengenalan pola",
+    },
+    whyConsensus: {
+      en: "Final score = weighted consensus of all three models. No single AI decides your fate.",
+      id: "Skor akhir = konsensus berbobot dari ketiga model. Tidak ada satu AI pun yang menentukan nasib kamu.",
+    },
+    whyConsensusCompany: {
+      en: "Each candidate is scored by all three models independently, then ranked by consensus — eliminating individual AI bias from your hiring decisions.",
+      id: "Setiap kandidat dinilai oleh ketiga model secara independen, lalu di-ranking berdasarkan konsensus — menghilangkan bias AI dari keputusan rekrutmen kamu.",
+    },
+
+    // FAQ
+    faqTitle: { en: "Frequently Asked Questions", id: "Pertanyaan yang Sering Diajukan" },
+    faqDataSafeQ: { en: "Is my data safe?", id: "Apakah data saya aman?" },
+    faqDataSafeA: {
+      en: "Yes. Your CV is sent directly to AI services for analysis and is never stored on our servers. The file is processed in-session and discarded immediately after.",
+      id: "Ya. CV kamu dikirim langsung ke layanan AI untuk dianalisis dan tidak pernah disimpan di server kami. File diproses dalam sesi dan langsung dihapus setelahnya.",
+    },
+    faqFormatQ: { en: "What format should my CV be?", id: "Format apa yang harus digunakan untuk CV?" },
+    faqFormatA: {
+      en: "We accept PDF files. For best results, use a standard single or two-column layout without tables, images, or headers/footers — these are the same formats that pass ATS systems.",
+      id: "Kami menerima file PDF. Untuk hasil terbaik, gunakan layout standar satu atau dua kolom tanpa tabel, gambar, atau header/footer — format yang sama yang lolos sistem ATS.",
+    },
+    faqAccuracyQ: { en: "How accurate is the scoring?", id: "Seberapa akurat scoring-nya?" },
+    faqAccuracyA: {
+      en: "By using 3 independent AI models and averaging their scores, we reduce individual model bias significantly. Our scoring correlates strongly with real ATS systems like Workday, Lever, and Greenhouse.",
+      id: "Dengan menggunakan 3 model AI independen dan merata-ratakan skor mereka, kami mengurangi bias model individu secara signifikan. Scoring kami berkorelasi kuat dengan sistem ATS seperti Workday, Lever, dan Greenhouse.",
+    },
+    faqJdRequiredQ: { en: "Do I need a job description?", id: "Apakah harus ada job description?" },
+    faqJdRequiredA: {
+      en: "Yes — the job description is what we score your CV against. You can paste it directly or provide a LinkedIn job posting link and we'll extract it automatically.",
+      id: "Ya — job description adalah acuan untuk menilai CV kamu. Kamu bisa paste langsung atau berikan link lowongan LinkedIn dan kami akan mengekstraknya secara otomatis.",
+    },
+    faqCostQ: { en: "Is it free?", id: "Apakah gratis?" },
+    faqCostA: {
+      en: "Yes, CekCV is completely free to use. No sign-up, no credit card, no limits.",
+      id: "Ya, CekCV sepenuhnya gratis. Tanpa daftar, tanpa kartu kredit, tanpa batasan.",
+    },
+    faqTimeQ: { en: "How long does the analysis take?", id: "Berapa lama analisisnya?" },
+    faqTimeA: {
+      en: "Individual analysis takes about 2-3 minutes. Company batch screening depends on the number of CVs — roughly 45 seconds per candidate.",
+      id: "Analisis individu memakan waktu sekitar 2-3 menit. Screening batch perusahaan tergantung jumlah CV — kira-kira 45 detik per kandidat.",
+    },
+
+    // Built with n8n
+    builtWithTitle: { en: "Built with n8n", id: "Dibangun dengan n8n" },
+    builtWithSubtitle: {
+      en: "The entire AI pipeline is powered by n8n workflow automation",
+      id: "Seluruh pipeline AI didukung oleh automasi workflow n8n",
+    },
+    builtWithStep1: { en: "CV files received via webhook", id: "File CV diterima via webhook" },
+    builtWithStep2: { en: "PDF parsed & text extracted", id: "PDF di-parse & teks diekstrak" },
+    builtWithStep3: { en: "Sent to GPT, Claude & Gemini in parallel", id: "Dikirim ke GPT, Claude & Gemini secara paralel" },
+    builtWithStep4: { en: "Scores aggregated & weighted", id: "Skor diagregasi & diberi bobot" },
+    builtWithStep5: { en: "Results returned to frontend", id: "Hasil dikembalikan ke frontend" },
+    builtWithNodes: { en: "{count}+ nodes across 2 workflows", id: "{count}+ node di 2 workflow" },
+    builtWithIntegrations: { en: "3 AI providers + LinkedIn Jobs API", id: "3 provider AI + LinkedIn Jobs API" },
+
     getStarted: { en: "Get started", id: "Mulai sekarang" },
     tryNow: { en: "Try now", id: "Coba sekarang" },
     startAnalysis: { en: "Start Analysis", id: "Mulai Analisis" },
@@ -133,8 +210,8 @@ export const translations = {
       id: "Analisis CV berbasis AI menggunakan GPT, Claude & Gemini untuk penilaian tanpa bias",
     },
     disclaimer: {
-      en: "This project was built for the N8N Automation Competition by Anjas Maradita \u2014 Belajar AI Indonesia. All names, companies, and testimonials shown are fictional and for demonstration purposes only. By uploading your CV, you acknowledge that your file is sent to third-party AI services (OpenAI, Anthropic, Google) for analysis. Files are processed in-session and not permanently stored.",
-      id: "Proyek ini dibuat untuk Kompetisi Automasi N8N Anjas Maradita \u2014 Belajar AI Indonesia. Semua nama, perusahaan, dan testimoni yang ditampilkan adalah fiktif dan hanya untuk keperluan demo. Dengan meng-upload CV, kamu menyetujui bahwa file dikirim ke layanan AI pihak ketiga (OpenAI, Anthropic, Google) untuk dianalisis. File diproses dalam sesi dan tidak disimpan secara permanen.",
+      en: "This project was built for the N8N Automation Competition by Anjas Maradita \u2014 Belajar AI Indonesia. All names, companies, and testimonials shown are fictional and for demonstration purposes only. Files are processed in-session and not permanently stored.",
+      id: "Proyek ini dibuat untuk Kompetisi Automasi N8N Anjas Maradita \u2014 Belajar AI Indonesia. Semua nama, perusahaan, dan testimoni yang ditampilkan adalah fiktif dan hanya untuk keperluan demo. File diproses dalam sesi dan tidak disimpan secara permanen.",
     },
   },
 
@@ -169,6 +246,10 @@ export const translations = {
     },
     errorConnect: { en: "Failed to connect to the server", id: "Gagal terhubung ke server" },
     errorStart: { en: "Failed to start analysis", id: "Gagal memulai analisis" },
+    validationError: {
+      en: "Please upload your CV/Resume and provide either a Job Description or a LinkedIn job posting link.",
+      id: "Silakan upload CV/Resume kamu dan isi Job Description atau link lowongan LinkedIn.",
+    },
   },
 
   // ── Progress view ──
@@ -221,6 +302,10 @@ export const translations = {
     },
     errorConnect: { en: "Failed to connect to the server", id: "Gagal terhubung ke server" },
     errorStart: { en: "Failed to start screening", id: "Gagal memulai screening" },
+    validationError: {
+      en: "Please fill in the Role Name and provide either a Job Description or a LinkedIn job posting link.",
+      id: "Silakan isi Nama Posisi dan berikan Job Description atau link lowongan LinkedIn.",
+    },
     // Progress
     progressTitle: { en: "Screening Candidates", id: "Sedang Screening Kandidat" },
     progressStarting: { en: "Starting batch analysis...", id: "Memulai analisis batch..." },
