@@ -16,9 +16,8 @@ import {
   Brain,
   Target,
   TrendingUp,
-  Briefcase,
   CheckCircle2,
-  FileEdit,
+  Download,
   Star,
   Quote,
   LayoutList,
@@ -31,6 +30,14 @@ import { LanguageToggle } from "@/components/apps/cekcv-individual/ui/language-t
 import { CekCVLogo } from "@/components/ui/logo";
 import { useLanguage } from "@/contexts/language-context";
 import { translations, t } from "@/lib/translations";
+
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  );
+}
 
 type Mode = "individual" | "company";
 
@@ -73,8 +80,8 @@ export default function Dashboard() {
     ? [
         { icon: Target, title: t(l.feat1Title, locale), desc: t(l.feat1Desc, locale) },
         { icon: TrendingUp, title: t(l.feat2Title, locale), desc: t(l.feat2Desc, locale) },
-        { icon: FileEdit, title: t(l.feat3Title, locale), desc: t(l.feat3Desc, locale) },
-        { icon: Briefcase, title: t(l.feat4Title, locale), desc: t(l.feat4Desc, locale) },
+        { icon: Download, title: t(l.feat3Title, locale), desc: t(l.feat3Desc, locale), badges: ["PDF", "DOCX"] },
+        { icon: LinkedInIcon, title: t(l.feat4Title, locale), desc: t(l.feat4Desc, locale) },
       ]
     : [
         { icon: FilePlus2, title: t(l.companyFeat1Title, locale), desc: t(l.companyFeat1Desc, locale) },
@@ -169,6 +176,11 @@ export default function Dashboard() {
                 {/* Google — optically smaller to match the others */}
                 <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
+                </svg>
+                <div className="h-4 w-px bg-border" />
+                {/* LinkedIn */}
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
                 </svg>
               </div>
             </div>
@@ -294,6 +306,15 @@ export default function Dashboard() {
                   <div>
                     <h3 className="text-lg font-semibold">{feat.title}</h3>
                     <p className="mt-1 text-muted-foreground">{feat.desc}</p>
+                    {"badges" in feat && (feat as { badges?: string[] }).badges && (
+                      <div className="mt-2 flex gap-1.5">
+                        {(feat as { badges: string[] }).badges.map((b) => (
+                          <span key={b} className="inline-flex items-center rounded-md border bg-muted/40 px-2 py-0.5 text-[11px] font-semibold text-muted-foreground">
+                            {b}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -554,20 +575,35 @@ export default function Dashboard() {
             <span className="text-sm font-medium">CekCV.Ai</span>
           </div>
           <p className="text-xs text-muted-foreground">{t(l.footerTagline, locale)}</p>
-          {/* Built with n8n badge */}
-          <a
-            href="https://n8n.io"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-1 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 transition-colors hover:bg-muted/40"
-          >
-            <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#ea4b71" xmlns="http://www.w3.org/2000/svg">
-              <path d="M21.4737 5.6842c-1.1772 0-2.1663.8051-2.4468 1.8947h-2.8955c-1.235 0-2.289.893-2.492 2.111l-.1038.623a1.263 1.263 0 0 1-1.246 1.0555H11.289c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947s-2.1663.8051-2.4467 1.8947H4.973c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947C1.1311 9.4737 0 10.6047 0 12s1.131 2.5263 2.5263 2.5263c1.1772 0 2.1663-.8051 2.4468-1.8947h1.4223c.2804 1.0896 1.2696 1.8947 2.4467 1.8947 1.1772 0 2.1663-.8051 2.4468-1.8947h1.0008a1.263 1.263 0 0 1 1.2459 1.0555l.1038.623c.203 1.218 1.257 2.111 2.492 2.111h.3692c.2804 1.0895 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263c-1.1772 0-2.1664.805-2.4468 1.8947h-.3692a1.263 1.263 0 0 1-1.246-1.0555l-.1037-.623A2.52 2.52 0 0 0 13.9607 12a2.52 2.52 0 0 0 .821-1.4794l.1038-.623a1.263 1.263 0 0 1 1.2459-1.0555h2.8955c.2805 1.0896 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263m0 1.2632a1.263 1.263 0 0 1 1.2631 1.2631 1.263 1.263 0 0 1-1.2631 1.2632 1.263 1.263 0 0 1-1.2632-1.2632 1.263 1.263 0 0 1 1.2632-1.2631M2.5263 10.7368A1.263 1.263 0 0 1 3.7895 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 1.2632 12a1.263 1.263 0 0 1 1.2631-1.2632m6.3158 0A1.263 1.263 0 0 1 10.1053 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 7.579 12a1.263 1.263 0 0 1 1.2632-1.2632m10.1053 3.7895a1.263 1.263 0 0 1 1.2631 1.2632 1.263 1.263 0 0 1-1.2631 1.2631 1.263 1.263 0 0 1-1.2632-1.2631 1.263 1.263 0 0 1 1.2632-1.2632"/>
-            </svg>
-            <span className="text-xs font-medium text-muted-foreground">
-              {locale === "en" ? "Built with n8n" : "Dibangun dengan n8n"}
-            </span>
-          </a>
+          {/* Built with badges */}
+          <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
+            <a
+              href="https://n8n.io"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 transition-colors hover:bg-muted/40"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#ea4b71" xmlns="http://www.w3.org/2000/svg">
+                <path d="M21.4737 5.6842c-1.1772 0-2.1663.8051-2.4468 1.8947h-2.8955c-1.235 0-2.289.893-2.492 2.111l-.1038.623a1.263 1.263 0 0 1-1.246 1.0555H11.289c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947s-2.1663.8051-2.4467 1.8947H4.973c-.2805-1.0896-1.2696-1.8947-2.4468-1.8947C1.1311 9.4737 0 10.6047 0 12s1.131 2.5263 2.5263 2.5263c1.1772 0 2.1663-.8051 2.4468-1.8947h1.4223c.2804 1.0896 1.2696 1.8947 2.4467 1.8947 1.1772 0 2.1663-.8051 2.4468-1.8947h1.0008a1.263 1.263 0 0 1 1.2459 1.0555l.1038.623c.203 1.218 1.257 2.111 2.492 2.111h.3692c.2804 1.0895 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263c-1.1772 0-2.1664.805-2.4468 1.8947h-.3692a1.263 1.263 0 0 1-1.246-1.0555l-.1037-.623A2.52 2.52 0 0 0 13.9607 12a2.52 2.52 0 0 0 .821-1.4794l.1038-.623a1.263 1.263 0 0 1 1.2459-1.0555h2.8955c.2805 1.0896 1.2696 1.8947 2.4468 1.8947 1.3952 0 2.5263-1.131 2.5263-2.5263s-1.131-2.5263-2.5263-2.5263m0 1.2632a1.263 1.263 0 0 1 1.2631 1.2631 1.263 1.263 0 0 1-1.2631 1.2632 1.263 1.263 0 0 1-1.2632-1.2632 1.263 1.263 0 0 1 1.2632-1.2631M2.5263 10.7368A1.263 1.263 0 0 1 3.7895 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 1.2632 12a1.263 1.263 0 0 1 1.2631-1.2632m6.3158 0A1.263 1.263 0 0 1 10.1053 12a1.263 1.263 0 0 1-1.2632 1.2632A1.263 1.263 0 0 1 7.579 12a1.263 1.263 0 0 1 1.2632-1.2632m10.1053 3.7895a1.263 1.263 0 0 1 1.2631 1.2632 1.263 1.263 0 0 1-1.2631 1.2631 1.263 1.263 0 0 1-1.2632-1.2631 1.263 1.263 0 0 1 1.2632-1.2632"/>
+              </svg>
+              <span className="text-xs font-medium text-muted-foreground">
+                {locale === "en" ? "Built with n8n" : "Dibangun dengan n8n"}
+              </span>
+            </a>
+            <a
+              href="https://claude.com/product/claude-code"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 transition-colors hover:bg-muted/40"
+            >
+              <svg className="h-4 w-4" viewBox="0 0 24 24" fill="#D97757" aria-label="Claude">
+                <path d="M13.827 3.52h3.603L24 20.48h-3.603l-6.57-16.96zm-7.258 0h3.767L16.906 20.48h-3.674l-1.343-3.461H5.017l-1.344 3.46H0l6.57-16.96zm2.327 5.15L6.27 14.981h5.252L8.896 8.67z"/>
+              </svg>
+              <span className="text-xs font-medium text-muted-foreground">
+                {locale === "en" ? "Designed with Claude" : "Didesain dengan Claude"}
+              </span>
+            </a>
+          </div>
           <p className="mt-1 max-w-xl text-center text-[11px] leading-relaxed text-muted-foreground/50">
             {t(l.disclaimer, locale)}
           </p>

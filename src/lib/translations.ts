@@ -14,8 +14,8 @@ export const translations = {
     headlineHighlight: { en: "interview-ready", id: "siap interview" },
     headlineEnd: { en: "in 3 minutes", id: "dalam 3 menit" },
     subtitle: {
-      en: "Score your CV against any job description, get actionable improvements, an AI-rewritten resume, and matching LinkedIn job openings \u2014 all in one analysis.",
-      id: "Skor CV kamu terhadap job description apapun, dapatkan saran perbaikan, resume yang di-rewrite AI, dan lowongan kerja LinkedIn yang cocok \u2014 semua dalam satu analisis.",
+      en: "Score your CV against any job description, get actionable improvements, an AI-rewritten resume, and matching job openings \u2014 all in one analysis.",
+      id: "Skor CV kamu terhadap job description apapun, dapatkan saran perbaikan, resume yang di-rewrite AI, dan lowongan kerja yang cocok \u2014 semua dalam satu analisis.",
     },
     ctaAnalyze: { en: "Analyze My CV \u2014 Free", id: "Analisis CV Saya \u2014 Gratis" },
     ctaScreen: { en: "Screen Candidates", id: "Screening Kandidat" },
@@ -38,8 +38,8 @@ export const translations = {
     },
     step3Title: { en: "Get Results", id: "Lihat Hasil" },
     step3Desc: {
-      en: "ATS score, missing keywords, an improved CV, and matching LinkedIn job openings",
-      id: "Skor ATS, keyword yang kurang, CV yang lebih baik, dan lowongan kerja LinkedIn yang cocok",
+      en: "ATS score, missing keywords, an improved CV, and matching job openings",
+      id: "Skor ATS, keyword yang kurang, CV yang lebih baik, dan lowongan kerja yang cocok",
     },
 
     featTitle: { en: "What you get", id: "Apa yang kamu dapatkan" },
@@ -57,15 +57,15 @@ export const translations = {
       en: "Priority-ranked changes with estimated score impact so you know what to fix first",
       id: "Perubahan yang diprioritaskan dengan estimasi dampak skor, jadi kamu tahu apa yang harus diperbaiki duluan",
     },
-    feat3Title: { en: "AI-Rewritten CV", id: "CV yang Di-rewrite AI" },
+    feat3Title: { en: "Download ATS-Ready CV", id: "Download CV Siap ATS" },
     feat3Desc: {
-      en: "Get an improved version of your CV with targeted keywords and better structure",
-      id: "Dapatkan versi CV yang sudah diperbaiki dengan keyword yang tepat dan struktur yang lebih baik",
+      en: "Instantly download your improved CV as PDF or DOCX — rewritten with the right keywords and structure for your target role",
+      id: "Langsung download CV yang sudah diperbaiki dalam format PDF atau DOCX — ditulis ulang dengan keyword dan struktur yang tepat untuk posisi targetmu",
     },
     feat4Title: { en: "LinkedIn Job Matching", id: "LinkedIn Job Matching" },
     feat4Desc: {
-      en: "Discover relevant LinkedIn openings that match your profile, pulled directly from LinkedIn Jobs",
-      id: "Temukan lowongan LinkedIn yang cocok dengan profil kamu, diambil langsung dari LinkedIn Jobs",
+      en: "Discover relevant openings from the last 7 days that match your profile",
+      id: "Temukan lowongan terbaru 7 hari terakhir yang cocok dengan profil kamu",
     },
 
     // Company mode
@@ -433,10 +433,10 @@ export const translations = {
 
     // Resume tab
     cvOptimizedFor: { en: "Your CV, optimized for", id: "CV kamu, dioptimasi untuk" },
-    cvGenerated: { en: "Your improved CV has been generated", id: "CV kamu yang sudah diperbaiki telah dibuat" },
+    cvGenerated: { en: "Your ATS-ready CV is ready to download", id: "CV siap ATS kamu sudah bisa di-download" },
     cvOptimizedDesc: {
-      en: "Optimized with targeted keywords and restructured for maximum ATS compatibility",
-      id: "Dioptimasi dengan keyword yang tepat dan direstruktur untuk kompatibilitas ATS maksimal",
+      en: "Rewritten with targeted keywords and optimized structure for your target role — download as PDF or DOCX",
+      id: "Ditulis ulang dengan keyword yang tepat dan struktur optimal untuk posisi targetmu — download dalam format PDF atau DOCX",
     },
     savePDF: { en: "Save PDF", id: "Simpan PDF" },
     downloadCV: { en: "Download CV", id: "Unduh CV" },
