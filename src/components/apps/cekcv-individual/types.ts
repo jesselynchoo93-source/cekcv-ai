@@ -42,6 +42,7 @@ export interface ImprovedResume {
   keywords_added: string[];
   download_url?: string;
   html?: string;
+  error?: string | null;
 }
 
 export interface JobMatch {

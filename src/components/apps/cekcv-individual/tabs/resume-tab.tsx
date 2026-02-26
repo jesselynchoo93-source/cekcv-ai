@@ -4,7 +4,7 @@ import { useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FileText, ArrowRight, Plus, Download, Printer } from "lucide-react";
+import { FileText, ArrowRight, Plus, Download, Printer, AlertCircle } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { translations, t } from "@/lib/translations";
 import type { CekCVResult } from "../types";
@@ -54,6 +54,7 @@ export function ResumeTab({ result, role }: ResumeTabProps) {
   }, [improved_resume.html, candidateName]);
 
   const hasDownload = !!(improved_resume.html || improved_resume.download_url);
+  const hasFailed = !hasDownload && !!improved_resume.error;
 
   return (
     <div className="space-y-6">
@@ -97,6 +98,11 @@ export function ResumeTab({ result, role }: ResumeTabProps) {
                 </Button>
               )}
             </div>
+          ) : hasFailed ? (
+            <p className="flex shrink-0 items-center gap-1.5 text-sm text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              {t(r.resumeGenFailed, locale)}
+            </p>
           ) : (
             <p className="shrink-0 text-sm text-muted-foreground">
               {t(r.processing, locale)}

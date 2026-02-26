@@ -356,6 +356,10 @@ export const translations = {
     savePDF: { en: "Save PDF", id: "Simpan PDF" },
     downloadCV: { en: "Download CV", id: "Unduh CV" },
     processing: { en: "Processing...", id: "Memproses..." },
+    resumeGenFailed: {
+      en: "Resume generation failed — please try analyzing again",
+      id: "Pembuatan CV gagal — silakan coba analisis ulang",
+    },
     scoreImpact: {
       en: "Applying these changes can raise your score from",
       id: "Menerapkan perubahan ini dapat menaikkan skor kamu dari",
@@ -366,7 +370,7 @@ export const translations = {
     keywordsAdded: { en: "Keywords added to your CV", id: "Keyword yang ditambahkan ke CV kamu" },
 
     // Jobs tab
-    similarRoles: { en: "Similar roles you'd be a good fit for", id: "Posisi serupa yang cocok untuk kamu" },
+    similarRoles: { en: "Open positions matching your CV profile", id: "Lowongan yang cocok dengan profil CV kamu" },
     foundJobs: { en: "Found {count} relevant jobs", id: "Ditemukan {count} lowongan relevan" },
     forQuery: { en: "for", id: "untuk" },
     strong: { en: "strong", id: "kuat" },
@@ -381,12 +385,12 @@ export const translations = {
     searchFor: { en: "Search keywords", id: "Kata kunci pencarian" },
     searchJobsBtn: { en: "Search LinkedIn Jobs", id: "Cari Lowongan LinkedIn" },
     jobSearchCta: {
-      en: "Ready to find your next opportunity?",
-      id: "Siap menemukan peluang berikutnya?",
+      en: "Find jobs that match your skills",
+      id: "Temukan lowongan yang cocok dengan skill kamu",
     },
     jobSearchCtaDesc: {
-      en: "We'll search LinkedIn for open positions that match your CV profile and skills. Results typically include 10\u201320 relevant job openings.",
-      id: "Kami akan mencari lowongan di LinkedIn yang cocok dengan profil dan skill CV kamu. Biasanya menghasilkan 10\u201320 lowongan relevan.",
+      en: "We'll search LinkedIn for openings based on the skills and experience from your CV \u2014 not the target role. Typically returns 10\u201320 results.",
+      id: "Kami akan mencari lowongan di LinkedIn berdasarkan skill dan pengalaman dari CV kamu \u2014 bukan target posisi. Biasanya menghasilkan 10\u201320 hasil.",
     },
     jobSearchNote: {
       en: "Search takes about 1\u20132 minutes",
