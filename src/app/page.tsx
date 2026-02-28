@@ -363,7 +363,7 @@ export default function Dashboard() {
           </div>
 
           {/* Sample result mockup */}
-          <div className="mt-8 overflow-hidden rounded-xl border shadow-lg">
+          <div className="mt-8 overflow-hidden rounded-xl shadow-lg">
             <div className="bg-muted/30 px-4 py-2.5 text-xs text-muted-foreground flex items-center gap-2">
               <div className="flex gap-1.5">
                 <div className="h-3 w-3 rounded-full bg-red-400" />
