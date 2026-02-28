@@ -9,6 +9,7 @@ import { Upload, FileText, X } from "lucide-react";
 import { useLanguage } from "@/contexts/language-context";
 import { translations, t } from "@/lib/translations";
 import { useJobPolling } from "@/hooks/use-job-polling";
+import { useDemoGate, DemoGateDialog } from "@/components/demo-gate";
 import { ResultsErrorBoundary } from "./error-boundary";
 import { ProgressView } from "./progress-view";
 import { ResultsView } from "./results-view";
@@ -27,6 +28,7 @@ export function CekCVIndividual() {
   const { locale } = useLanguage();
   const f = translations.form;
   const r = translations.results;
+  const demo = useDemoGate();
 
   const handleFile = useCallback((incoming: File | null) => {
     if (incoming && !incoming.name.match(/\.pdf$/i)) {
@@ -135,7 +137,9 @@ export function CekCVIndividual() {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+        <DemoGateDialog open={demo.showDialog} onOpenChange={demo.setShowDialog} onUnlock={demo.onUnlock} />
+
+        <form onSubmit={demo.guardSubmit(handleSubmit)} className="mt-6 space-y-6">
           {/* Drag and drop zone */}
           <div className="space-y-2">
             <Label htmlFor="cv-file">{t(f.labelCV, locale)}</Label>

@@ -21,6 +21,7 @@ import {
 import { useJobPolling } from "@/hooks/use-job-polling";
 import { useLanguage } from "@/contexts/language-context";
 import { translations, t } from "@/lib/translations";
+import { useDemoGate, DemoGateDialog } from "@/components/demo-gate";
 import { RotatingTips } from "@/components/apps/cekcv-individual/ui/rotating-tips";
 import { CompanyDashboard } from "@/components/apps/cekcv-company/dashboard";
 
@@ -66,6 +67,7 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
   const { status, polling, pollError, stale, stepDescriptions, displayProgress, start, reset } = useJobPolling();
   const { locale } = useLanguage();
   const f = translations.companyForm;
+  const demo = useDemoGate();
   const initialLoadedRef = useRef(false);
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -256,7 +258,9 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+        <DemoGateDialog open={demo.showDialog} onOpenChange={demo.setShowDialog} onUnlock={demo.onUnlock} />
+
+        <form onSubmit={demo.guardSubmit(handleSubmit)} className="mt-6 space-y-6">
           {/* Role name */}
           <div className="space-y-2">
             <Label htmlFor="role-name">{t(f.labelRole, locale)}</Label>
