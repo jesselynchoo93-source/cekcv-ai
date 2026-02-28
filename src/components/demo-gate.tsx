@@ -101,8 +101,8 @@ export function DemoGateDialog({
           </DialogTitle>
           <DialogDescription className="text-center">
             {locale === "en"
-              ? "Submissions are disabled in demo mode. This site is for preview purposes only — no CV analysis will be processed."
-              : "Pengiriman dinonaktifkan dalam mode demo. Situs ini hanya untuk pratinjau — tidak ada analisis CV yang akan diproses."}
+              ? "Submissions are disabled in demo mode due to limited credits to run API calls."
+              : "Pengiriman dinonaktifkan dalam mode demo karena keterbatasan kredit untuk menjalankan API."}
           </DialogDescription>
         </DialogHeader>
 
