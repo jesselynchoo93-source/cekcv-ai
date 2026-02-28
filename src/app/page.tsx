@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -46,6 +46,24 @@ export default function Dashboard() {
   const l = translations.landing;
   const [mode, setMode] = useState<Mode>("individual");
   const getStartedRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          video.play().catch(() => {});
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.3 }
+    );
+    observer.observe(video);
+    return () => observer.disconnect();
+  }, []);
 
   const isIndividual = mode === "individual";
 
@@ -351,45 +369,17 @@ export default function Dashboard() {
               <span className="ml-2">cekcv.ai{isIndividual ? "/apps/cekcv-individual" : "/apps/cekcv-company"}</span>
             </div>
             {isIndividual ? (
-              <div className="bg-card p-6 sm:p-8">
-                {/* Mock individual result */}
-                <div className="flex items-start gap-4">
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl cekcv-gradient text-2xl font-bold text-white">
-                    78
-                  </div>
-                  <div>
-                    <p className="text-lg font-semibold">{locale === "en" ? "Hi, Putri!" : "Halo, Putri!"}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {locale === "en"
-                        ? "Your CV scores 78/100 for the Senior Product Manager role"
-                        : "CV kamu mendapat skor 78/100 untuk posisi Senior Product Manager"}
-                    </p>
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        {locale === "en" ? "Potential: 91" : "Potensi: 91"}
-                      </span>
-                      <span className="rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-700 dark:bg-green-900/30 dark:text-green-400">
-                        {locale === "en" ? "5 strengths found" : "5 kekuatan ditemukan"}
-                      </span>
-                      <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
-                        {locale === "en" ? "3 improvements" : "3 perbaikan"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-6 grid gap-4 sm:grid-cols-4">
-                  {[
-                    { label: locale === "en" ? "ATS Score" : "Skor ATS", value: "78/100", color: "text-blue-600" },
-                    { label: locale === "en" ? "Missing Keywords" : "Keyword Kurang", value: "4", color: "text-amber-600" },
-                    { label: locale === "en" ? "Improved CV" : "CV Perbaikan", value: locale === "en" ? "Ready" : "Siap", color: "text-green-600" },
-                    { label: locale === "en" ? "Job Matches" : "Lowongan Cocok", value: "12", color: "text-purple-600" },
-                  ].map((item, i) => (
-                    <div key={i} className="rounded-lg border bg-muted/20 p-3 text-center">
-                      <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
-                      <p className="text-[11px] text-muted-foreground">{item.label}</p>
-                    </div>
-                  ))}
-                </div>
+              <div>
+                <video
+                  ref={videoRef}
+                  className="block w-full"
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                >
+                  <source src="/demo-individual.mp4" type="video/mp4" />
+                </video>
               </div>
             ) : (
               <div className="bg-card p-6 sm:p-8">
