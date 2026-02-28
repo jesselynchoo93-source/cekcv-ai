@@ -373,10 +373,10 @@ export default function Dashboard() {
               <span className="ml-2">cekcv.ai{isIndividual ? "/apps/cekcv-individual" : "/apps/cekcv-company"}</span>
             </div>
             {isIndividual ? (
-              <div key="individual">
+              <div key="individual" className="overflow-hidden">
                 <video
                   ref={individualVideoRef}
-                  className="block w-full"
+                  className="block w-full -mt-px"
                   muted
                   loop
                   playsInline
@@ -386,10 +386,10 @@ export default function Dashboard() {
                 </video>
               </div>
             ) : (
-              <div key="company">
+              <div key="company" className="overflow-hidden">
                 <video
                   ref={companyVideoRef}
-                  className="block w-full"
+                  className="block w-full -mt-px"
                   muted
                   loop
                   playsInline
