@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -171,6 +171,7 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
     setRoleName("");
     setError(null);
     setDragActive(false);
+    setShowResults(false);
     if (fileRef.current) fileRef.current.value = "";
     // Clear batchId from URL
     const url = new URL(window.location.href);
@@ -181,11 +182,33 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
   };
 
   const result = status?.result as Record<string, unknown> | null;
-  const isComplete = status?.status === "complete" && result;
+  const isRawComplete = status?.status === "complete" && result;
+
+  // Show "Done" step for 2s before transitioning to results
+  const [showResults, setShowResults] = useState(false);
+  useEffect(() => {
+    if (isRawComplete && !showResults) {
+      const timer = setTimeout(() => setShowResults(true), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isRawComplete, showResults]);
+
+  const isComplete = isRawComplete && showResults;
+
+  // Build blob URLs for uploaded PDFs so the detail panel can preview them
+  const fileUrls = useMemo(() => {
+    const map: Record<string, string> = {};
+    for (const f of files) {
+      map[f.name] = URL.createObjectURL(f);
+    }
+    return map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [files.length]);
   const isError = status?.status === "error" || !!pollError;
-  const isProcessing = polling || (status?.status === "processing" && !pollError);
-  // When recovering from URL, show a loading state instead of flashing the form
-  const isRecovering = !!batchIdFromUrl && !status && !pollError;
+  const isCompleting = isRawComplete && !showResults; // 2s "Done" step window
+  const isProcessing = polling || (status?.status === "processing" && !pollError) || isCompleting;
+  // When recovering from URL (not from a fresh submit), show a loading state instead of flashing the form
+  const isRecovering = !!batchIdFromUrl && !status && !pollError && !polling;
 
   // ── Loading (recovering from URL) ──
   if (isRecovering) {
@@ -413,6 +436,7 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
       onReset={handleReset}
       roleName={roleName}
       jobDescription={jobDescription}
+      fileUrls={fileUrls}
     />
   );
 }
@@ -478,8 +502,8 @@ function CompanyProgressView({
   const rawStep = status?.step || "started";
   const progress = Math.round(displayProgress);
   const currentStep = normalizeStep(rawStep, progress);
-  const candidateIdx = status?.candidateIndex || 0;
   const totalCandidates = status?.totalCandidates || files.length;
+
   const stepOrder = Object.keys(COMPANY_STEPS);
   const currentIdx = stepOrder.indexOf(currentStep);
 
@@ -494,8 +518,16 @@ function CompanyProgressView({
     return () => clearInterval(interval);
   }, [startTime]);
 
-  // Estimate based on number of candidates (~120s per candidate for 3-model grading)
-  const estimatedDuration = Math.max(90, totalCandidates * 120);
+  // Estimate based on number of candidates (~140s per candidate for 3-model grading)
+  const estimatedDuration = Math.max(90, totalCandidates * 140);
+
+  // Derive which CV is being processed from the time-based progress bar
+  // The bar fills over estimatedDuration; each CV gets an equal share
+  const timeProgress = Math.min((elapsed / estimatedDuration) * 100, 99);
+  const candidateIdx = totalCandidates > 0 && elapsed > 0
+    ? Math.min(Math.floor((timeProgress / 100) * totalCandidates), totalCandidates - 1)
+    : -1;
+  const activeCvIdx = candidateIdx >= 0 && candidateIdx < files.length ? candidateIdx : -1;
   const remaining = Math.max(0, estimatedDuration - elapsed);
 
   let timeDisplay: string;
@@ -540,21 +572,24 @@ function CompanyProgressView({
         <div>
           <h2 className="text-lg font-semibold">{t(f.progressTitle, locale)}</h2>
           <p className="text-sm text-muted-foreground">
-            {files.length} CV{files.length !== 1 ? "s" : ""} ({formatFileSize(totalSize)})
+            {files.length > 0
+              ? `${files.length} CV${files.length !== 1 ? "s" : ""} (${formatFileSize(totalSize)})`
+              : totalCandidates > 0
+                ? `${totalCandidates} CV${totalCandidates !== 1 ? "s" : ""}`
+                : locale === "en" ? "Processing..." : "Memproses..."}
           </p>
         </div>
       </div>
 
-      {/* Gradient progress bar */}
+      {/* Progress bar (fills over 700s) */}
       <div className="mt-6">
         <div className="relative h-2.5 overflow-hidden rounded-full bg-muted/30">
           <div
-            className="cekcv-progress-shimmer h-full rounded-full transition-all duration-700 ease-out"
-            style={{ width: `${Math.max(progress, 3)}%` }}
+            className="cekcv-progress-shimmer h-full rounded-full transition-all duration-1000 ease-linear"
+            style={{ width: `${timeProgress}%` }}
           />
         </div>
-        <div className="mt-1.5 flex justify-between text-xs text-muted-foreground">
-          <span>{progress}% {t(p.complete, locale)}</span>
+        <div className="mt-1.5 text-right text-xs text-muted-foreground">
           <span>{timeDisplay}</span>
         </div>
       </div>
@@ -667,74 +702,73 @@ function CompanyProgressView({
       {/* Active step detail */}
       {currentStep !== "complete" && (
         <div className="mt-6 rounded-xl border bg-background/80 p-4 animate-in fade-in-0 slide-in-from-bottom-2">
-          <p className="text-sm font-medium">{status?.stepDescription || getCompanyStepDescription(currentStep, totalCandidates, locale, f)}</p>
-        </div>
-      )}
-
-      {/* Candidate progress */}
-      {totalCandidates > 1 && (
-        <div className="mt-4 rounded-xl border bg-background/80 p-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm font-medium">
-              {t(f.progressCandidate, locale)
-                .replace("{current}", String(Math.min(candidateIdx + 1, totalCandidates)))
-                .replace("{total}", String(totalCandidates))}
-            </p>
-            <span className="text-xs text-muted-foreground">
-              {candidateIdx}/{totalCandidates} {locale === "en" ? "done" : "selesai"}
-            </span>
-          </div>
-          <div className="mt-2 flex gap-1">
-            {Array.from({ length: totalCandidates }).map((_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                  i < candidateIdx
-                    ? "cekcv-gradient"
-                    : i === candidateIdx
-                      ? "cekcv-progress-shimmer"
-                      : "bg-muted/30"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* CV files + JD context panels */}
-      <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <div className="rounded-xl border bg-background/60 p-4">
-          <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <FileText className="h-3.5 w-3.5" />
-            {locale === "en" ? "Candidate CVs" : "CV Kandidat"}
-          </h3>
-          <ul className="mt-2 space-y-1">
-            {files.slice(0, 5).map((file, i) => (
-              <li key={i} className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                <span className="mt-0.5 h-1 w-1 shrink-0 rounded-full cekcv-gradient" />
-                <span className="truncate">{file.name}</span>
-              </li>
-            ))}
-            {files.length > 5 && (
-              <li className="text-xs text-muted-foreground/50">
-                +{files.length - 5} more
-              </li>
-            )}
-          </ul>
-        </div>
-
-        <div className="rounded-xl border bg-background/60 p-4">
-          <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-            <Target className="h-3.5 w-3.5" />
-            {locale === "en" ? "Target Role" : "Target Posisi"}
-          </h3>
-          <p className="mt-2 text-sm font-medium">{roleName || "—"}</p>
-          <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
-            {jobDescription.slice(0, 200)}
-            {jobDescription.length > 200 && "..."}
+          <p className="text-sm font-medium">
+            {candidateIdx >= 0 && totalCandidates > 0
+              ? (locale === "en"
+                  ? `Analyzing CV ${candidateIdx + 1} of ${totalCandidates}...`
+                  : `Menganalisis CV ${candidateIdx + 1} dari ${totalCandidates}...`)
+              : getCompanyStepDescription(currentStep, totalCandidates, locale, f)}
           </p>
         </div>
-      </div>
+      )}
+
+
+      {/* CV files + JD context panels (only when files are in memory) */}
+      {(files.length > 0 || jobDescription) && (
+        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+          {files.length > 0 && (
+            <div className="rounded-xl border bg-background/60 p-4">
+              <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <FileText className="h-3.5 w-3.5" />
+                {locale === "en" ? "Candidate CVs" : "CV Kandidat"}
+              </h3>
+              <ul className="mt-2 space-y-1">
+                {files.slice(0, 5).map((_, i) => {
+                  const isCurrent = i === activeCvIdx;
+                  const isDone = activeCvIdx >= 0 && i < activeCvIdx;
+                  const isPending = activeCvIdx >= 0 && i > activeCvIdx;
+                  return (
+                    <li
+                      key={i}
+                      className={`flex items-center gap-1.5 text-xs transition-all duration-300 ${
+                        isCurrent
+                          ? "font-semibold text-foreground"
+                          : isDone
+                            ? "text-muted-foreground"
+                            : isPending
+                              ? "text-muted-foreground/40"
+                              : "text-muted-foreground"
+                      }`}
+                    >
+                      <span className={`mt-0.5 h-1 w-1 shrink-0 rounded-full ${isCurrent ? "cekcv-gradient" : isDone ? "cekcv-gradient" : "bg-muted-foreground/30"}`} />
+                      <span className="truncate">{files[i].name}</span>
+                    </li>
+                  );
+                })}
+                {files.length > 5 && (
+                  <li className="text-xs text-muted-foreground/50">
+                    +{files.length - 5} more
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
+
+          {jobDescription && (
+            <div className="rounded-xl border bg-background/60 p-4">
+              <h3 className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                <Target className="h-3.5 w-3.5" />
+                {locale === "en" ? "Target Role" : "Target Posisi"}
+              </h3>
+              <p className="mt-2 text-sm font-medium">{roleName || "—"}</p>
+              <p className="mt-1 text-xs text-muted-foreground line-clamp-3">
+                {jobDescription.slice(0, 200)}
+                {jobDescription.length > 200 && "..."}
+              </p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Stale warning */}
       {stale && !pollError && (

@@ -39,11 +39,13 @@ export function CompanyDashboard({
   onReset,
   roleName,
   jobDescription,
+  fileUrls,
 }: {
   result: Record<string, unknown>;
   onReset: () => void;
   roleName?: string;
   jobDescription?: string;
+  fileUrls?: Record<string, string>;
 }) {
   const { locale } = useLanguage();
   const f = translations.companyForm;
@@ -360,6 +362,7 @@ export function CompanyDashboard({
         role={role}
         open={selectedIdx !== null}
         onClose={() => setSelectedIdx(null)}
+        fileUrls={fileUrls}
       />
 
       {/* Start over */}

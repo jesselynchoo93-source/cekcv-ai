@@ -46,24 +46,28 @@ export default function Dashboard() {
   const l = translations.landing;
   const [mode, setMode] = useState<Mode>("individual");
   const getStartedRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
+  const individualVideoRef = useRef<HTMLVideoElement>(null);
+  const companyVideoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
+    const videos = [individualVideoRef.current, companyVideoRef.current].filter(Boolean) as HTMLVideoElement[];
+    if (videos.length === 0) return;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-        }
+      (entries) => {
+        entries.forEach((entry) => {
+          const video = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting) {
+            video.play().catch(() => {});
+          } else {
+            video.pause();
+          }
+        });
       },
       { threshold: 0.3 }
     );
-    observer.observe(video);
+    videos.forEach((v) => observer.observe(v));
     return () => observer.disconnect();
-  }, []);
+  }, [mode]);
 
   const isIndividual = mode === "individual";
 
@@ -369,9 +373,9 @@ export default function Dashboard() {
               <span className="ml-2">cekcv.ai{isIndividual ? "/apps/cekcv-individual" : "/apps/cekcv-company"}</span>
             </div>
             {isIndividual ? (
-              <div>
+              <div key="individual">
                 <video
-                  ref={videoRef}
+                  ref={individualVideoRef}
                   className="block w-full"
                   muted
                   loop
@@ -382,46 +386,17 @@ export default function Dashboard() {
                 </video>
               </div>
             ) : (
-              <div className="bg-card p-6 sm:p-8">
-                {/* Mock company result */}
-                <div>
-                  <p className="text-lg font-semibold">{locale === "en" ? "Screening Results" : "Hasil Screening"}</p>
-                  <p className="text-sm text-muted-foreground">
-                    Senior Product Manager | {locale === "en" ? "9 candidates screened by 3 AI models" : "9 kandidat discreening oleh 3 model AI"}
-                  </p>
-                </div>
-                <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  {[
-                    { label: locale === "en" ? "Avg. Score" : "Rata-rata", value: "72", color: "text-blue-600" },
-                    { label: locale === "en" ? "Shortlisted" : "Shortlist", value: "6", color: "text-green-600" },
-                    { label: locale === "en" ? "Interview Ready" : "Siap Interview", value: "3", color: "text-purple-600" },
-                    { label: locale === "en" ? "Best Score" : "Skor Terbaik", value: "89", color: "text-blue-600" },
-                  ].map((item, i) => (
-                    <div key={i} className="rounded-lg border bg-muted/20 p-3 text-center">
-                      <p className={`text-xl font-bold ${item.color}`}>{item.value}</p>
-                      <p className="text-[11px] text-muted-foreground">{item.label}</p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 space-y-2">
-                  {[
-                    { name: "Ahmad Rizky", score: 89, status: "shortlist" },
-                    { name: "Dinda Putri", score: 82, status: "shortlist" },
-                    { name: "Budi Santoso", score: 76, status: "shortlist" },
-                  ].map((c, i) => (
-                    <div key={i} className="flex items-center gap-3 rounded-lg border bg-muted/10 px-4 py-2.5">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded cekcv-gradient text-xs font-bold text-white">{i + 1}</span>
-                      <span className="flex-1 text-sm font-medium">{c.name}</span>
-                      <span className="rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                        {locale === "en" ? "Shortlisted" : "Shortlist"}
-                      </span>
-                      <span className="text-lg font-bold text-blue-600">{c.score}</span>
-                    </div>
-                  ))}
-                  <p className="text-center text-xs text-muted-foreground">
-                    {locale === "en" ? "+6 more candidates..." : "+6 kandidat lagi..."}
-                  </p>
-                </div>
+              <div key="company">
+                <video
+                  ref={companyVideoRef}
+                  className="block w-full"
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                >
+                  <source src="/demo-company.mp4" type="video/mp4" />
+                </video>
               </div>
             )}
           </div>
@@ -559,7 +534,7 @@ export default function Dashboard() {
             <CekCVLogo size="sm" />
             <span className="text-sm font-medium">CekCV.Ai</span>
           </div>
-          <p className="text-xs text-muted-foreground">{t(l.footerTagline, locale)}</p>
+          <p className="text-center text-xs text-muted-foreground">{t(l.footerTagline, locale)}</p>
           {/* Built with badges */}
           <div className="mt-1 flex flex-wrap items-center justify-center gap-2">
             <a

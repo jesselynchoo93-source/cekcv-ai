@@ -97,19 +97,21 @@ export function CandidateDetailPanel({
   role,
   open,
   onClose,
+  fileUrls,
 }: {
   candidate: DashboardCandidate | null;
   rank: number;
   role: string;
   open: boolean;
   onClose: () => void;
+  fileUrls?: Record<string, string>;
 }) {
   if (!candidate) return null;
 
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <SheetContent side="right" className="w-full overflow-y-auto px-5 pb-6 sm:max-w-xl">
-        <CandidateDetailContent c={candidate} rank={rank} role={role} />
+        <CandidateDetailContent c={candidate} rank={rank} role={role} fileUrls={fileUrls} />
       </SheetContent>
     </Sheet>
   );
@@ -119,10 +121,12 @@ function CandidateDetailContent({
   c,
   rank,
   role,
+  fileUrls,
 }: {
   c: DashboardCandidate;
   rank: number;
   role: string;
+  fileUrls?: Record<string, string>;
 }) {
   const { locale } = useLanguage();
   const f = translations.companyForm;
@@ -314,13 +318,6 @@ function CandidateDetailContent({
             )}
           </div>
 
-          {/* Source file */}
-          {c.fileName && (
-            <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-              <FileText className="h-3 w-3" />
-              {c.fileName}
-            </p>
-          )}
         </TabsContent>
 
         {/* ── Scores Tab ── */}
@@ -450,7 +447,6 @@ function CandidateDetailContent({
                       {resume.experience[0].start && ` · ${resume.experience[0].start}`}
                       {resume.experience[0].end && `–${resume.experience[0].end}`}
                     </p>
-                    {yoe && <p className="text-[10px] text-muted-foreground">{yoe} {locale === "en" ? "total experience" : "total pengalaman"}</p>}
                   </div>
                 </div>
               )}
@@ -502,12 +498,24 @@ function CandidateDetailContent({
             </div>
           </div>
 
-          {c.fileName && (
+          {c.fileName && fileUrls?.[c.fileName] ? (
+            <div className="mt-4">
+              <p className="mb-2 flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+                <FileText className="h-3 w-3" />
+                {c.fileName}
+              </p>
+              <iframe
+                src={fileUrls[c.fileName]}
+                title={c.fileName}
+                className="h-[500px] w-full rounded-lg border"
+              />
+            </div>
+          ) : c.fileName ? (
             <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
               <FileText className="h-3 w-3" />
               {c.fileName}
             </p>
-          )}
+          ) : null}
         </TabsContent>
       </Tabs>
     </div>
