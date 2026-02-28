@@ -351,6 +351,84 @@ export const translations = {
     source: { en: "Source", id: "Sumber" },
     email: { en: "Email", id: "Email" },
     whatsapp: { en: "WhatsApp", id: "WhatsApp" },
+    exportExcel: { en: "Export Excel", id: "Ekspor Excel" },
+    shareDashboard: { en: "Share Link", id: "Bagikan Link" },
+    copiedLink: { en: "Link copied!", id: "Link tersalin!" },
+    minScore: { en: "Min Score", id: "Skor Min" },
+    jobRequirements: { en: "Job Requirements", id: "Persyaratan Pekerjaan" },
+    priorityWeights: { en: "Priority Weights", id: "Prioritas Bobot" },
+    selectAllShortlisted: { en: "Select All Shortlisted", id: "Pilih Semua Shortlist" },
+    emailAll: { en: "Email All", id: "Email Semua" },
+    exportSelected: { en: "Export Selected", id: "Ekspor Terpilih" },
+    noGaps: { en: "No significant gaps identified", id: "Tidak ada kekurangan signifikan teridentifikasi" },
+    selected: { en: "selected", id: "dipilih" },
+  },
+
+  // ── Screening Guide (company results info popup) ──
+  screeningGuide: {
+    btnLabel: { en: "How it works", id: "Cara kerja" },
+    title: { en: "How Screening Works", id: "Cara Kerja Screening" },
+    subtitle: {
+      en: "Understand how candidates are scored, ranked, and categorized",
+      id: "Pahami bagaimana kandidat dinilai, diranking, dan dikategorikan",
+    },
+    // 3 AI models
+    modelsTitle: { en: "Multi-Model AI Screening", id: "Screening AI Multi-Model" },
+    modelsDesc: {
+      en: "Each CV is independently analyzed by 3 different AI models (GPT, Claude, Gemini). The final score is an average of all three, reducing bias from any single model.",
+      id: "Setiap CV dianalisis secara independen oleh 3 model AI berbeda (GPT, Claude, Gemini). Skor akhir adalah rata-rata dari ketiganya, mengurangi bias dari satu model saja.",
+    },
+    // Score ranges
+    scaleTitle: { en: "Score Ranges", id: "Rentang Skor" },
+    range75: { en: "75–100: Shortlisted", id: "75–100: Shortlist" },
+    range75Desc: {
+      en: "Strong match for the role. The candidate meets most or all of the key requirements and should be prioritized for interviews.",
+      id: "Sangat cocok dengan posisi. Kandidat memenuhi sebagian besar atau semua persyaratan utama dan harus diprioritaskan untuk interview.",
+    },
+    range50: { en: "50–74: Under Review", id: "50–74: Dalam Review" },
+    range50Desc: {
+      en: "Partial match — the candidate has relevant skills but is missing some requirements. Worth a closer look, especially if the talent pool is competitive.",
+      id: "Cocok sebagian — kandidat punya skill relevan tapi kurang beberapa persyaratan. Layak ditinjau lebih lanjut, terutama jika talent pool kompetitif.",
+    },
+    range0: { en: "0–49: Rejected", id: "0–49: Ditolak" },
+    range0Desc: {
+      en: "Significant mismatch between the candidate's profile and job requirements. Major gaps in must-have qualifications.",
+      id: "Ketidakcocokan signifikan antara profil kandidat dan persyaratan kerja. Gap besar pada kualifikasi wajib.",
+    },
+    // Must-Have vs Nice-to-Have
+    matchTitle: { en: "Must-Have vs Nice-to-Have", id: "Wajib vs Nilai Tambah" },
+    matchDesc: {
+      en: "Must-Have % shows how many critical requirements the candidate meets (e.g. required certifications, years of experience). Nice-to-Have % covers bonus qualifications. A candidate with 100% must-have but low nice-to-have is still a strong fit.",
+      id: "Must-Have % menunjukkan berapa banyak persyaratan kritis yang dipenuhi kandidat (misal sertifikasi wajib, pengalaman). Nice-to-Have % mencakup kualifikasi bonus. Kandidat dengan 100% must-have tapi nice-to-have rendah tetap cocok.",
+    },
+    // Strengths & Gaps
+    insightsTitle: { en: "Strengths & Gaps", id: "Kekuatan & Kekurangan" },
+    insightsDesc: {
+      en: "Each candidate gets a deduplicated list of strengths and gaps compiled from all 3 AI models. Items appearing across multiple models are more reliable signals.",
+      id: "Setiap kandidat mendapat daftar kekuatan dan kekurangan yang telah di-deduplikasi dari 3 model AI. Item yang muncul di beberapa model adalah sinyal yang lebih terpercaya.",
+    },
+    // FAQ
+    faqTitle: { en: "Common Questions", id: "Pertanyaan Umum" },
+    faq1Q: { en: "Can I trust the AI scores?", id: "Apakah skor AI bisa dipercaya?" },
+    faq1A: {
+      en: "The multi-model approach helps reduce individual model biases. However, AI screening is a tool to assist your hiring process, not replace it. Always review shortlisted candidates yourself before making interview decisions.",
+      id: "Pendekatan multi-model membantu mengurangi bias model individu. Namun, screening AI adalah alat bantu, bukan pengganti. Selalu review kandidat shortlist sendiri sebelum membuat keputusan interview.",
+    },
+    faq2Q: { en: "Why was a good candidate rejected?", id: "Kenapa kandidat bagus ditolak?" },
+    faq2A: {
+      en: "AI scores are based on how well a CV matches the specific job description. A talented person may score low if their CV doesn't highlight relevant keywords or experience for this particular role. You can override any status by clicking the status badge.",
+      id: "Skor AI didasarkan pada seberapa cocok CV dengan job description spesifik. Orang berbakat bisa mendapat skor rendah jika CV-nya tidak menonjolkan keyword atau pengalaman yang relevan untuk posisi ini. Kamu bisa mengubah status kapan saja dengan klik badge status.",
+    },
+    faq3Q: { en: "What do the Priority Weights mean?", id: "Apa arti Prioritas Bobot?" },
+    faq3A: {
+      en: "Priority Weights (shown in the Job Requirements section) indicate how much each category was weighted in the scoring. A higher weight means that category had more influence on the final score. These are auto-detected from the job description.",
+      id: "Prioritas Bobot (ditampilkan di bagian Persyaratan Pekerjaan) menunjukkan seberapa besar setiap kategori diberi bobot dalam penilaian. Bobot lebih tinggi berarti kategori tersebut punya pengaruh lebih besar pada skor akhir. Ini dideteksi otomatis dari job description.",
+    },
+    faq4Q: { en: "How should I use the Compare feature?", id: "Bagaimana cara menggunakan fitur Bandingkan?" },
+    faq4A: {
+      en: "Select 2–5 candidates using the checkboxes, then click Compare to see them side-by-side. This is especially useful for shortlisted candidates who have similar scores but different strengths and gaps.",
+      id: "Pilih 2–5 kandidat menggunakan checkbox, lalu klik Bandingkan untuk melihat mereka berdampingan. Ini sangat berguna untuk kandidat shortlist yang punya skor mirip tapi kekuatan dan kekurangan yang berbeda.",
+    },
   },
 
   // ── Step labels ──

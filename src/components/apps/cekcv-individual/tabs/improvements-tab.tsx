@@ -24,18 +24,21 @@ interface ImprovementsTabProps {
 
 /**
  * Splits a long paragraph into scannable bullet points.
- * Splits on sentence boundaries (. followed by space + uppercase) while
- * keeping quoted text, abbreviations (e.g., "e.g.", "P&L"), and examples intact.
+ * Splits on numbered markers like (1), (2), (3) first, then falls back
+ * to sentence boundaries — while keeping quoted text and abbreviations intact.
  */
 function splitIntoBullets(text: string): string[] {
-  // Split on ". " followed by an uppercase letter — the most reliable sentence boundary.
-  // Negative lookbehind avoids splitting after common abbreviations.
+  // First try splitting on numbered markers: (1), (2), (3), etc.
+  const numberedParts = text.split(/\s*\(\d+\)\s*/).filter(Boolean);
+  if (numberedParts.length >= 2) return numberedParts.map((s) => s.trim());
+
+  // Fallback: split on ". " followed by uppercase, but only at true sentence
+  // boundaries — skip after common abbreviations (e.g., i.e., vs., etc.)
   const sentences = text
-    .split(/(?<=[.!])\s+(?=[A-Z])/)
+    .split(/(?<!\b(?:e\.g|i\.e|vs|etc|Mr|Mrs|Dr|Sr|Jr|ca|approx))\.\s+(?=[A-Z])/)
     .map((s) => s.trim())
     .filter(Boolean);
 
-  // If splitting produced only 1 chunk (or text is short), return as-is.
   if (sentences.length <= 1) return [text];
   return sentences;
 }

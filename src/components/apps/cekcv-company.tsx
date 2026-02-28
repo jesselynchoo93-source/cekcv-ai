@@ -63,7 +63,7 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
   const [error, setError] = useState<string | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const { status, polling, pollError, stepDescriptions, displayProgress, start, reset } = useJobPolling();
+  const { status, polling, pollError, stale, stepDescriptions, displayProgress, start, reset } = useJobPolling();
   const { locale } = useLanguage();
   const f = translations.companyForm;
   const initialLoadedRef = useRef(false);
@@ -378,6 +378,7 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
       <CompanyProgressView
         status={status}
         pollError={pollError}
+        stale={stale}
         onReset={handleReset}
         roleName={roleName}
         jobDescription={jobDescription}
@@ -411,6 +412,7 @@ export function CekCVCompany({ initialBatchId }: { initialBatchId?: string } = {
       result={result!}
       onReset={handleReset}
       roleName={roleName}
+      jobDescription={jobDescription}
     />
   );
 }
@@ -449,6 +451,7 @@ interface CompanyProgressProps {
     totalCandidates?: number;
   } | null;
   pollError: string | null;
+  stale: boolean;
   onReset: () => void;
   roleName: string;
   jobDescription: string;
@@ -460,6 +463,7 @@ interface CompanyProgressProps {
 function CompanyProgressView({
   status,
   pollError,
+  stale,
   onReset,
   roleName,
   jobDescription,
@@ -490,12 +494,14 @@ function CompanyProgressView({
     return () => clearInterval(interval);
   }, [startTime]);
 
-  // Estimate based on number of candidates (~45s per candidate)
-  const estimatedDuration = Math.max(60, totalCandidates * 45);
+  // Estimate based on number of candidates (~120s per candidate for 3-model grading)
+  const estimatedDuration = Math.max(90, totalCandidates * 120);
   const remaining = Math.max(0, estimatedDuration - elapsed);
 
   let timeDisplay: string;
-  if (progress >= 90) {
+  if (stale) {
+    timeDisplay = locale === "en" ? "Waiting for response..." : "Menunggu respons...";
+  } else if (progress >= 90) {
     timeDisplay = t(p.almostDone, locale);
   } else if (remaining <= 30 && progress >= 50) {
     timeDisplay = t(p.lessThan30, locale);
@@ -675,7 +681,7 @@ function CompanyProgressView({
                 .replace("{total}", String(totalCandidates))}
             </p>
             <span className="text-xs text-muted-foreground">
-              {Math.round(((candidateIdx) / totalCandidates) * 100)}%
+              {candidateIdx}/{totalCandidates} {locale === "en" ? "done" : "selesai"}
             </span>
           </div>
           <div className="mt-2 flex gap-1">
@@ -729,6 +735,22 @@ function CompanyProgressView({
           </p>
         </div>
       </div>
+
+      {/* Stale warning */}
+      {stale && !pollError && (
+        <div className="mt-4 rounded-lg border border-yellow-500/50 bg-yellow-50/80 dark:bg-yellow-950/20 p-3">
+          <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
+            {locale === "en"
+              ? "Processing seems to be taking longer than expected"
+              : "Pemrosesan tampaknya lebih lama dari biasanya"}
+          </p>
+          <p className="text-xs text-yellow-600/80 dark:text-yellow-500/80">
+            {locale === "en"
+              ? "This may be due to high AI load. You can wait or try again."
+              : "Ini mungkin karena beban AI tinggi. Anda bisa menunggu atau coba lagi."}
+          </p>
+        </div>
+      )}
 
       {/* Error display */}
       {pollError && (

@@ -68,7 +68,7 @@ export function ResultsView({ result, jobDescription, jobId, onReset }: ResultsV
         </TabsList>
 
         <TabsContent value="overview" className={`mt-6 space-y-6 ${tabContentClass}`}>
-          <OverviewTab result={result} role={result.role} />
+          <OverviewTab result={result} />
         </TabsContent>
 
         <TabsContent value="improvements" className={`mt-6 space-y-6 ${tabContentClass}`}>

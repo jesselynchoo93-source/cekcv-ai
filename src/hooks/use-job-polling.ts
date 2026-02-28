@@ -6,9 +6,11 @@ import type { StatusResponse } from "@/lib/n8n";
 const POLL_INTERVAL = 4000;
 const FETCH_TIMEOUT = 15000; // Abort slow polls after 15s so they don't block subsequent polls
 const MAX_ERRORS = 5;
-const MAX_POLL_DURATION = 10 * 60 * 1000; // 10 minutes
+const MAX_POLL_DURATION = 15 * 60 * 1000; // 15 minutes — company batch can take 10+ min
 const INTERPOLATION_INTERVAL = 1000; // Smooth progress every second
-const INTERPOLATION_RATE = 0.4; // Add 0.4% per second when progress hasn't changed
+const INTERPOLATION_RATE = 0.15; // Add 0.15% per second when progress hasn't changed
+const STALE_POLL_THRESHOLD = 8; // After 8 polls (~32s) with no activity change, consider stale
+const DEAD_POLL_THRESHOLD = 75; // After 75 polls (~5min) with no activity, assume execution crashed
 
 export function useJobPolling() {
   const [jobId, setJobId] = useState<string | null>(null);
@@ -17,6 +19,7 @@ export function useJobPolling() {
   const [pollError, setPollError] = useState<string | null>(null);
   const [stepDescriptions, setStepDescriptions] = useState<Record<string, string>>({});
   const [displayProgress, setDisplayProgress] = useState(0);
+  const [stale, setStale] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const maxDurationRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -26,6 +29,9 @@ export function useJobPolling() {
   const pollingRef = useRef(false);
   const highWaterRef = useRef(0);
   const realProgressRef = useRef(0);
+  const stalePollCountRef = useRef(0);
+  const lastRealProgressRef = useRef(0);
+  const lastUpdatedAtRef = useRef("");
 
   const stopInterpolation = useCallback(() => {
     if (interpolationRef.current) {
@@ -37,10 +43,12 @@ export function useJobPolling() {
   const startInterpolation = useCallback(() => {
     stopInterpolation();
     interpolationRef.current = setInterval(() => {
+      // Stop interpolating when progress is stale — don't fake movement
+      if (stalePollCountRef.current >= STALE_POLL_THRESHOLD) return;
       setDisplayProgress((prev) => {
         const real = realProgressRef.current;
         // Don't interpolate past the next expected milestone or 99%
-        const cap = Math.min(real + 25, 99);
+        const cap = Math.min(real + 5, 99);
         if (prev >= cap) return prev;
         return Math.min(prev + INTERPOLATION_RATE, cap);
       });
@@ -114,6 +122,43 @@ export function useJobPolling() {
         statusData.progress > prev ? statusData.progress : prev
       );
 
+      // Client-side staleness: if the server's updatedAt hasn't changed in 5+ minutes,
+      // the n8n execution likely crashed or was canceled
+      if (statusData.status === "processing" && statusData.updatedAt) {
+        const serverAge = Date.now() - new Date(statusData.updatedAt).getTime();
+        if (serverAge > 5 * 60 * 1000) {
+          stop();
+          setPollError("Processing was interrupted. Please try again.");
+          return;
+        }
+      }
+
+      // Track stale activity — reset counter if EITHER progress OR updatedAt changed.
+      // n8n writes a fresh updatedAt at the start of each candidate even when progress
+      // hasn't moved yet, so this keeps the job "alive" during long per-candidate processing.
+      const serverUpdatedAt = statusData.updatedAt || "";
+      const activityChanged =
+        statusData.progress !== lastRealProgressRef.current ||
+        serverUpdatedAt !== lastUpdatedAtRef.current;
+
+      if (activityChanged) {
+        stalePollCountRef.current = 0;
+        lastRealProgressRef.current = statusData.progress;
+        lastUpdatedAtRef.current = serverUpdatedAt;
+        setStale(false);
+      } else {
+        stalePollCountRef.current++;
+        if (stalePollCountRef.current >= DEAD_POLL_THRESHOLD) {
+          // Execution likely crashed — n8n never updated the status
+          stop();
+          setPollError("Processing appears to have stopped. Please try again.");
+          return;
+        }
+        if (stalePollCountRef.current >= STALE_POLL_THRESHOLD) {
+          setStale(true);
+        }
+      }
+
       setStatus(statusData);
 
       // Accumulate step descriptions as they arrive
@@ -153,7 +198,11 @@ export function useJobPolling() {
       errorCountRef.current = 0;
       highWaterRef.current = 0;
       realProgressRef.current = 0;
+      stalePollCountRef.current = 0;
+      lastRealProgressRef.current = 0;
+      lastUpdatedAtRef.current = "";
       setDisplayProgress(0);
+      setStale(false);
       // Small delay before first poll to let Init Job Status write the row
       timeoutRef.current = setTimeout(() => poll(id), 1000);
       intervalRef.current = setInterval(() => poll(id), POLL_INTERVAL);
@@ -176,12 +225,16 @@ export function useJobPolling() {
     errorCountRef.current = 0;
     highWaterRef.current = 0;
     realProgressRef.current = 0;
+    stalePollCountRef.current = 0;
+    lastRealProgressRef.current = 0;
+    lastUpdatedAtRef.current = "";
     setDisplayProgress(0);
+    setStale(false);
   }, [stop]);
 
   useEffect(() => {
     return () => stop();
   }, [stop]);
 
-  return { jobId, status, polling, pollError, stepDescriptions, displayProgress, start, reset };
+  return { jobId, status, polling, pollError, stale, stepDescriptions, displayProgress, start, reset };
 }
